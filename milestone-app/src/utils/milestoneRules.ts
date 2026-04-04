@@ -1,0 +1,90 @@
+import { MilestoneRule } from '../types';
+
+export const milestoneRules: MilestoneRule[] = [
+  {
+    id: 'days_100',
+    title: '100 Days',
+    description: 'Celebrate every 100 days',
+    category: 'classic',
+    unit: 'days',
+    interval: 100,
+  },
+  {
+    id: 'days_1000',
+    title: '1,000 Days',
+    description: 'Celebrate every 1,000 days',
+    category: 'classic',
+    unit: 'days',
+    interval: 1000,
+  },
+  {
+    id: 'days_10000',
+    title: '10,000 Days',
+    description: 'Celebrate every 10,000 days',
+    category: 'classic',
+    unit: 'days',
+    interval: 10000,
+  },
+  {
+    id: 'hours_10000',
+    title: '10,000 Hours',
+    description: 'Celebrate every 10,000 hours',
+    category: 'classic',
+    unit: 'hours',
+    interval: 10000,
+  },
+  {
+    id: 'minutes_100000',
+    title: '100,000 Minutes',
+    description: 'Celebrate every 100,000 minutes',
+    category: 'classic',
+    unit: 'minutes',
+    interval: 100000,
+  },
+  {
+    id: 'minutes_1000000',
+    title: '1,000,000 Minutes',
+    description: 'Celebrate every 1,000,000 minutes',
+    category: 'classic',
+    unit: 'minutes',
+    interval: 1000000,
+  },
+  {
+    id: 'years_1',
+    title: '1 Year',
+    description: 'Celebrate every year',
+    category: 'anniversary',
+    unit: 'years',
+    interval: 1,
+  },
+  {
+    id: 'years_5',
+    title: '5 Years',
+    description: 'Celebrate every 5 years',
+    category: 'anniversary',
+    unit: 'years',
+    interval: 5,
+  },
+  {
+    id: 'moon_cycles_100',
+    title: '100 Moon Cycles',
+    description: 'About every 2,953 days',
+    category: 'space',
+    unit: 'days',
+    interval: 2953,
+  },
+  {
+    id: 'venus_years_1',
+    title: '1 Venus Year',
+    description: 'About every 225 Earth days',
+    category: 'space',
+    unit: 'days',
+    interval: 225,
+  },
+];
+
+export const defaultMilestoneIds = [
+  'days_1000',
+  'hours_10000',
+  'minutes_100000',
+];
