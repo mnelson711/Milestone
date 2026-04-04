@@ -26,3 +26,18 @@ export const theme = {
     lg: 20,
   },
 };
+
+export const calendarTheme = {
+  calendarBackground: theme.colors.surface,
+  textSectionTitleColor: theme.colors.textMuted,
+  selectedDayBackgroundColor: theme.colors.primaryDark,
+  selectedDayTextColor: theme.colors.white,
+  todayTextColor: theme.colors.secondary,
+  dayTextColor: theme.colors.text,
+  textDisabledColor: theme.colors.border,
+  monthTextColor: theme.colors.text,
+  arrowColor: theme.colors.primary,
+  indicatorColor: theme.colors.primary,
+  dotColor: theme.colors.primary,
+  selectedDotColor: theme.colors.white,
+};

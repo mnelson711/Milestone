@@ -14,6 +14,7 @@ import EventDetailsScreen from './src/screens/EventDetailsScreen';
 import EditEventScreen from './src/screens/EditEventScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import AboutScreen from './src/screens/AboutScreen';
+import CalendarScreen from './src/screens/CalendarScreen';
 
 import {
   setupNotifications,
@@ -158,6 +159,15 @@ export default function App() {
             headerShown: false,
             drawerIcon: ({ color, size }) => (
               <Ionicons name="home-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="Calendar"
+          component={CalendarScreen}
+          options={{
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="calendar-outline" size={size} color={color} />
             ),
           }}
         />
