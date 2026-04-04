@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { View, Text, FlatList, Switch, Button } from 'react-native';
+import { View, FlatList, Switch, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getUpcomingMilestones, getNextUpcomingMilestone } from '../utils/milestones';
 import { EventItem } from '../types';
@@ -8,6 +8,14 @@ import {
   syncEventNotifications,
   getNotificationPermissionStatus,
 } from '../utils/notifications';
+import ScreenContainer from '../components/ScreenContainer';
+import SectionCard from '../components/SectionCard';
+import AppButton from '../components/AppButton';
+import AppText from '../components/AppText';
+import { theme } from '../theme/theme';
+
+import SectionHeader from '../components/SectionHeader';
+import { Ionicons } from '@expo/vector-icons';
 
 type EventDetailsScreenProps = {
   navigation: any;
@@ -32,7 +40,7 @@ export default function EventDetailsScreen({
 
   const loadEvent = useCallback(async () => {
     setIsLoading(true);
-    console.log('Loading event with ID:', eventId);
+
     const storedEvent = await getEventById(eventId);
     setEvent(storedEvent);
 
@@ -76,17 +84,17 @@ export default function EventDetailsScreen({
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, padding: 20 }}>
-        <Text>Loading event...</Text>
-      </View>
+      <ScreenContainer>
+        <AppText variant="body">Loading event...</AppText>
+      </ScreenContainer>
     );
   }
 
   if (!event) {
     return (
-      <View style={{ flex: 1, padding: 20 }}>
-        <Text>Event not found.</Text>
-      </View>
+      <ScreenContainer>
+        <AppText variant="body">Event not found.</AppText>
+      </ScreenContainer>
     );
   }
 
@@ -94,114 +102,240 @@ export default function EventDetailsScreen({
   const nextMilestone = getNextUpcomingMilestone(event);
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <Text style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 8 }}>
-        {event.label}
-      </Text>
-
-      <Text style={{ fontSize: 16, marginBottom: 12 }}>
-        Original date: {new Date(event.date).toLocaleDateString()}
-      </Text>
-
-      <View style={{ marginBottom: 20 }}>
-        <Button
-          title="Edit Event"
-          onPress={() => navigation.navigate('Edit Event', { eventId: event.id })}
-        />
-      </View>
-
-      <View
-        style={{
-          borderWidth: 1,
-          borderRadius: 8,
-          padding: 12,
-          marginBottom: 20,
-        }}
-      >
-        <Text style={{ fontSize: 20, fontWeight: '600', marginBottom: 12 }}>
-          Notifications
-        </Text>
-
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: 10,
-          }}
-        >
-          <Text style={{ fontSize: 16 }}>
-            {event.notificationsEnabled === false ? 'Off' : 'On'}
-          </Text>
-          <Switch
-            value={event.notificationsEnabled !== false}
-            onValueChange={handleToggleNotifications}
-            disabled={isSavingNotificationPreference}
-          />
-        </View>
-
-        <Text>
-          Device permission:{' '}
-          {permissionGranted === null
-            ? 'Checking...'
-            : permissionGranted
-            ? 'Granted'
-            : 'Not granted'}
-        </Text>
-
-        <Text style={{ marginTop: 6 }}>
-          Scheduled notifications: {event.scheduledNotificationIds?.length ?? 0}
-        </Text>
-
-        {event.notificationsEnabled !== false && !permissionGranted ? (
-          <Text style={{ marginTop: 10 }}>
-            Notifications are enabled for this event, but device permission is off.
-          </Text>
-        ) : null}
-
-        {nextMilestone ? (
+    <ScreenContainer>
+      <FlatList
+        data={milestones}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContent}
+        ListHeaderComponent={
           <>
-            <Text style={{ fontWeight: '600', marginTop: 10 }}>
-              Next tracked milestone:
-            </Text>
-            <Text>{nextMilestone.label}</Text>
-            <Text>{nextMilestone.targetDate.toLocaleDateString()}</Text>
-            <Text>{nextMilestone.timeRemainingText}</Text>
-          </>
-        ) : (
-          <Text style={{ marginTop: 10 }}>No upcoming milestone available.</Text>
-        )}
-      </View>
+            <AppText variant="title" style={styles.pageTitle}>
+              {event.label}
+            </AppText>
+            <AppText variant="muted" style={styles.pageSubtitle}>
+              {new Date(event.date).toLocaleDateString()}
+            </AppText>
 
-      <Text style={{ fontSize: 22, fontWeight: '600', marginBottom: 12 }}>
-        Upcoming Milestones
-      </Text>
+            <SectionCard>
+              <SectionHeader
+                title="Event Overview"
+                iconName="calendar-outline"
+              />
 
-      {milestones.length === 0 ? (
-        <Text>No milestones available.</Text>
-      ) : (
-        <FlatList
-          data={milestones}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View
-              style={{
-                borderWidth: 1,
-                borderRadius: 8,
-                padding: 12,
-                marginBottom: 12,
-              }}
-            >
-              <Text style={{ fontSize: 18, fontWeight: '600' }}>{item.label}</Text>
-              <Text style={{ marginTop: 4 }}>{item.description}</Text>
-              <Text style={{ marginTop: 4 }}>
-                {item.targetDate.toLocaleDateString()}
-              </Text>
-              <Text style={{ marginTop: 4 }}>{item.timeRemainingText}</Text>
+              <View style={styles.infoRow}>
+                <AppText variant="body">Date</AppText>
+                <AppText variant="muted">
+                  {new Date(event.date).toLocaleDateString()}
+                </AppText>
+              </View>
+
+              <View style={styles.infoRow}>
+                <AppText variant="body">Tracked milestone types</AppText>
+                <AppText variant="muted">
+                  {event.selectedMilestoneIds?.length ?? 0}
+                </AppText>
+              </View>
+
+              <View style={styles.infoRow}>
+                <View style={styles.infoLabelRow}>
+                  <Ionicons name="time-outline" size={16} color={theme.colors.textMuted} />
+                  <AppText variant="body" style={styles.infoLabelText}>Date</AppText>
+                </View>
+                <AppText variant="muted">
+                  {new Date(event.date).toLocaleDateString()}
+                </AppText>
+              </View>
+
+              <View style={styles.editButtonWrapper}>
+                <AppButton
+                  title="Edit Event"
+                  onPress={() => navigation.navigate('Edit Event', { eventId: event.id })}
+                  variant="secondary"
+                />
+              </View>
+            </SectionCard>
+
+            <SectionCard>
+              <SectionHeader
+                title="Notifications"
+                iconName="notifications-outline"
+              />
+
+              <View style={styles.toggleRow}>
+                <View style={styles.toggleText}>
+                  <AppText variant="body">Notifications</AppText>
+                  <AppText variant="muted">
+                    {event.notificationsEnabled === false ? 'Off' : 'On'}
+                  </AppText>
+                </View>
+
+                <Switch
+                  value={event.notificationsEnabled !== false}
+                  onValueChange={handleToggleNotifications}
+                  disabled={isSavingNotificationPreference}
+                  trackColor={{
+                    false: theme.colors.border,
+                    true: theme.colors.primaryDark,
+                  }}
+                  thumbColor={
+                    event.notificationsEnabled !== false
+                      ? theme.colors.primary
+                      : theme.colors.textMuted
+                  }
+                />
+              </View>
+
+              <View style={styles.statusBlock}>
+                <AppText variant="body">
+                  Device permission:{' '}
+                  {permissionGranted === null
+                    ? 'Checking...'
+                    : permissionGranted
+                    ? 'Granted'
+                    : 'Not granted'}
+                </AppText>
+
+                {event.notificationsEnabled !== false && !permissionGranted ? (
+                  <AppText variant="muted" style={styles.statusMessage}>
+                    Notifications are enabled for this event, but device permission is off.
+                  </AppText>
+                ) : null}
+              </View>
+
+              {nextMilestone ? (
+                <View style={styles.nextMilestoneBlock}>
+                  <AppText variant="body" style={styles.blockLabel}>
+                    Next tracked milestone
+                  </AppText>
+                  <AppText variant="subtitle" style={styles.nextMilestoneTitle}>
+                    {nextMilestone.label}
+                  </AppText>
+                  <AppText variant="muted">
+                    {nextMilestone.targetDate.toLocaleDateString()}
+                  </AppText>
+                  <AppText variant="muted">
+                    {nextMilestone.timeRemainingText}
+                  </AppText>
+                </View>
+              ) : (
+                <AppText variant="muted" style={styles.statusMessage}>
+                  No upcoming milestone available.
+                </AppText>
+              )}
+            </SectionCard>
+
+            <View style={styles.milestonesHeader}>
+              <SectionHeader
+                title="Upcoming Milestones"
+                iconName="trophy-outline"
+              />
+              <AppText variant="muted">
+                {milestones.length} shown
+              </AppText>
             </View>
-          )}
-        />
-      )}
-    </View>
+          </>
+        }
+        renderItem={({ item }) => (
+          <SectionCard>
+            <AppText variant="subtitle" style={styles.milestoneTitle}>
+              {item.label}
+            </AppText>
+            <AppText variant="muted" style={styles.milestoneDescription}>
+              {item.description}
+            </AppText>
+
+            <View style={styles.milestoneMeta}>
+              <AppText variant="body">
+                {item.targetDate.toLocaleDateString()}
+              </AppText>
+              <AppText variant="muted">
+                {item.timeRemainingText}
+              </AppText>
+            </View>
+          </SectionCard>
+        )}
+        ListEmptyComponent={
+          <SectionCard>
+            <AppText variant="body">No milestones available.</AppText>
+          </SectionCard>
+        }
+      />
+    </ScreenContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  listContent: {
+    paddingBottom: theme.spacing.xl,
+  },
+  pageTitle: {
+    marginBottom: theme.spacing.xs,
+  },
+  pageSubtitle: {
+    marginBottom: theme.spacing.lg,
+  },
+  sectionTitle: {
+    marginBottom: theme.spacing.md,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
+  },
+  infoLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  infoLabelText: {
+    marginLeft: theme.spacing.xs,
+  },
+  editButtonWrapper: {
+    marginTop: theme.spacing.sm,
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+  },
+  toggleText: {
+    flex: 1,
+  },
+  statusBlock: {
+    marginBottom: theme.spacing.md,
+  },
+  statusMessage: {
+    marginTop: theme.spacing.xs,
+  },
+  nextMilestoneBlock: {
+    backgroundColor: theme.colors.surfaceSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    padding: theme.spacing.md,
+  },
+  blockLabel: {
+    marginBottom: theme.spacing.xs,
+  },
+  nextMilestoneTitle: {
+    marginBottom: theme.spacing.xs,
+  },
+  milestonesHeader: {
+    marginBottom: theme.spacing.sm,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  milestoneTitle: {
+    marginBottom: theme.spacing.xs,
+  },
+  milestoneDescription: {
+    marginBottom: theme.spacing.md,
+  },
+  milestoneMeta: {
+    gap: theme.spacing.xs,
+  },
+});

@@ -1,16 +1,12 @@
 import 'react-native-gesture-handler';
 import { useEffect, useRef } from 'react';
-import { AppState, AppStateStatus, Pressable } from 'react-native';
+import { AppState, AppStateStatus, Text } from 'react-native';
 import {
   NavigationContainer,
   DefaultTheme,
-  DrawerActions,
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-
-import { Text } from 'react-native';
-
 
 import HomeScreen from './src/screens/HomeScreen';
 import AddEventScreen from './src/screens/AddEventScreen';
@@ -24,17 +20,12 @@ import {
   syncAllEventNotifications,
 } from './src/utils/notifications';
 import { theme } from './src/theme/theme';
+import DrawerMenuButton from './src/components/DrawerMenuButton';
+import CustomDrawerContent from './src/components/CustomDrawerContent';
+import { Ionicons } from '@expo/vector-icons';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
-
-function AppHeaderMenu() {
-  return (
-    <Text style={{ color: theme.colors.text, fontSize: 22, fontWeight: '700' }}>
-      ☰
-    </Text>
-  );
-}
 
 const navTheme = {
   ...DefaultTheme,
@@ -48,18 +39,6 @@ const navTheme = {
   },
 };
 
-function DrawerMenuButton({ navigation }: { navigation: any }) {
-  return (
-    <Pressable
-      onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
-      style={{ paddingHorizontal: 12, paddingVertical: 8 }}
-    >
-      <Pressable>
-        {/* simple text icon so you don't need another package yet */}
-      </Pressable>
-    </Pressable>
-  );
-}
 function HomeStackNavigator() {
   return (
     <Stack.Navigator
@@ -74,6 +53,7 @@ function HomeStackNavigator() {
         contentStyle: {
           backgroundColor: theme.colors.background,
         },
+        headerShadowVisible: false,
       })}
     >
       <Stack.Screen
@@ -81,25 +61,9 @@ function HomeStackNavigator() {
         component={HomeScreen}
         options={({ navigation }) => ({
           title: 'Home',
-          headerLeft: () => (
-            <Pressable
-              onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
-              style={{ paddingHorizontal: 12, paddingVertical: 8 }}
-            >
-              <Text
-                style={{
-                  color: theme.colors.text,
-                  fontSize: 22,
-                  fontWeight: '700',
-                }}
-              >
-                ☰
-              </Text>
-            </Pressable>
-          ),
+          headerLeft: () => <DrawerMenuButton navigation={navigation} />,
         })}
       />
-
       <Stack.Screen name="Add Event" component={AddEventScreen} />
       <Stack.Screen name="Event Details" component={EventDetailsScreen} />
       <Stack.Screen name="Edit Event" component={EditEventScreen} />
@@ -161,6 +125,7 @@ export default function App() {
   return (
     <NavigationContainer theme={navTheme}>
       <Drawer.Navigator
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
         screenOptions={{
           headerStyle: {
             backgroundColor: theme.colors.surface,
@@ -169,14 +134,17 @@ export default function App() {
           headerTitleStyle: {
             fontWeight: '600',
           },
+          headerShadowVisible: false,
           drawerStyle: {
             backgroundColor: theme.colors.surface,
-            width: 260,
+            width: 280,
           },
           drawerActiveTintColor: theme.colors.primary,
           drawerInactiveTintColor: theme.colors.textMuted,
+          drawerActiveBackgroundColor: theme.colors.surfaceSoft,
           drawerLabelStyle: {
             fontSize: 16,
+            marginLeft: -8,
           },
           sceneStyle: {
             backgroundColor: theme.colors.background,
@@ -186,10 +154,31 @@ export default function App() {
         <Drawer.Screen
           name="Home"
           component={HomeStackNavigator}
-          options={{ headerShown: false }}
+          options={{
+            headerShown: false,
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="home-outline" size={size} color={color} />
+            ),
+          }}
         />
-        <Drawer.Screen name="Settings" component={SettingsScreen} />
-        <Drawer.Screen name="About" component={AboutScreen} />
+        <Drawer.Screen
+          name="Settings"
+          component={SettingsScreen}
+          options={{
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="settings-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="About"
+          component={AboutScreen}
+          options={{
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="information-circle-outline" size={size} color={color} />
+            ),
+          }}
+        />
       </Drawer.Navigator>
     </NavigationContainer>
   );

@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import {
   View,
-  Text,
   TextInput,
-  Button,
   Alert,
   Platform,
   ScrollView,
+  StyleSheet,
 } from 'react-native';
 import DateTimePicker, {
   DateTimePickerEvent,
@@ -16,6 +15,11 @@ import { getEventById, updateEvent } from '../storage/storage';
 import { syncEventNotifications } from '../utils/notifications';
 import MilestoneSelector from '../components/MilestoneSelector';
 import { defaultMilestoneIds } from '../utils/milestoneRules';
+import ScreenContainer from '../components/ScreenContainer';
+import SectionCard from '../components/SectionCard';
+import AppButton from '../components/AppButton';
+import AppText from '../components/AppText';
+import { theme } from '../theme/theme';
 
 type EditEventScreenProps = {
   navigation: any;
@@ -40,6 +44,7 @@ export default function EditEventScreen({
   const [selectedMilestoneIds, setSelectedMilestoneIds] = useState<string[]>(
     defaultMilestoneIds
   );
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const loadEvent = async () => {
@@ -84,7 +89,7 @@ export default function EditEventScreen({
   };
 
   const handleSave = async () => {
-    if (!originalEvent) {
+    if (!originalEvent || isSaving) {
       return;
     }
 
@@ -100,74 +105,174 @@ export default function EditEventScreen({
       return;
     }
 
-    let updatedEvent: EventItem = {
-      ...originalEvent,
-      label: trimmedLabel,
-      date: selectedDate.toISOString(),
-      selectedMilestoneIds,
-    };
+    setIsSaving(true);
 
-    await updateEvent(updatedEvent);
-    updatedEvent = await syncEventNotifications(updatedEvent);
+    try {
+      let updatedEvent: EventItem = {
+        ...originalEvent,
+        label: trimmedLabel,
+        date: selectedDate.toISOString(),
+        selectedMilestoneIds,
+      };
 
-    navigation.replace('Event Details', { eventId: updatedEvent.id });
+      await updateEvent(updatedEvent);
+      updatedEvent = await syncEventNotifications(updatedEvent);
+
+      navigation.replace('Event Details', { eventId: updatedEvent.id });
+    } catch (error) {
+      console.error('Error updating event:', error);
+      Alert.alert('Error', 'Something went wrong while saving the event.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, padding: 20 }}>
-        <Text>Loading event...</Text>
-      </View>
+      <ScreenContainer>
+        <AppText variant="body">Loading event...</AppText>
+      </ScreenContainer>
     );
   }
 
   if (!originalEvent) {
     return (
-      <View style={{ flex: 1, padding: 20 }}>
-        <Text>Event not found.</Text>
-      </View>
+      <ScreenContainer>
+        <AppText variant="body">Event not found.</AppText>
+      </ScreenContainer>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 20 }}>
-      <Text style={{ marginBottom: 6 }}>Event Name</Text>
-      <TextInput
-        value={label}
-        onChangeText={setLabel}
-        placeholder="Birthday, Wedding..."
-        style={{ borderWidth: 1, marginBottom: 16, padding: 10, borderRadius: 6 }}
-      />
+    <ScreenContainer>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <AppText variant="title" style={styles.pageTitle}>
+          Edit Event
+        </AppText>
+        <AppText variant="muted" style={styles.pageSubtitle}>
+          Update the event details and milestone selection.
+        </AppText>
 
-      <Text style={{ marginBottom: 6 }}>Date</Text>
-      <Button
-        title={selectedDate.toLocaleDateString()}
-        onPress={() => setShowDatePicker(true)}
-      />
+        <SectionCard>
+          <AppText variant="subtitle" style={styles.sectionTitle}>
+            Basic Info
+          </AppText>
 
-      {showDatePicker && (
-        <DateTimePicker
-          value={selectedDate}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={handleDateChange}
-        />
-      )}
+          <AppText variant="body" style={styles.label}>
+            Event Name
+          </AppText>
+          <TextInput
+            value={label}
+            onChangeText={setLabel}
+            placeholder="Birthday, Wedding..."
+            placeholderTextColor={theme.colors.textMuted}
+            style={styles.input}
+          />
+        </SectionCard>
 
-      {Platform.OS === 'ios' && showDatePicker && (
-        <View style={{ marginTop: 12 }}>
-          <Button title="Done" onPress={() => setShowDatePicker(false)} />
+        <SectionCard>
+          <AppText variant="subtitle" style={styles.sectionTitle}>
+            Event Date
+          </AppText>
+
+          <AppText variant="body" style={styles.label}>
+            Selected Date
+          </AppText>
+
+          <AppButton
+            title={selectedDate.toLocaleDateString()}
+            onPress={() => setShowDatePicker(true)}
+            variant="secondary"
+          />
+
+          {showDatePicker && (
+            <View style={styles.datePickerWrapper}>
+              <DateTimePicker
+                value={selectedDate}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={handleDateChange}
+              />
+            </View>
+          )}
+
+          {Platform.OS === 'ios' && showDatePicker && (
+            <View style={styles.doneButtonWrapper}>
+              <AppButton
+                title="Done"
+                onPress={() => setShowDatePicker(false)}
+                variant="secondary"
+              />
+            </View>
+          )}
+        </SectionCard>
+
+        <SectionCard>
+          <AppText variant="subtitle" style={styles.sectionTitle}>
+            Milestones
+          </AppText>
+          <AppText variant="muted" style={styles.sectionDescription}>
+            Choose which milestone types should apply to this event.
+          </AppText>
+
+          <MilestoneSelector
+            selectedMilestoneIds={selectedMilestoneIds}
+            onToggleMilestone={handleToggleMilestone}
+          />
+        </SectionCard>
+
+        <View style={styles.saveButtonWrapper}>
+          <AppButton
+            title={isSaving ? 'Saving Changes...' : 'Save Changes'}
+            onPress={handleSave}
+            disabled={isSaving}
+          />
         </View>
-      )}
-
-      <MilestoneSelector
-        selectedMilestoneIds={selectedMilestoneIds}
-        onToggleMilestone={handleToggleMilestone}
-      />
-
-      <View style={{ marginTop: 20 }}>
-        <Button title="Save Changes" onPress={handleSave} />
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </ScreenContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    paddingBottom: theme.spacing.xl,
+  },
+  pageTitle: {
+    marginBottom: theme.spacing.xs,
+  },
+  pageSubtitle: {
+    marginBottom: theme.spacing.lg,
+  },
+  sectionTitle: {
+    marginBottom: theme.spacing.md,
+  },
+  sectionDescription: {
+    marginBottom: theme.spacing.sm,
+  },
+  label: {
+    marginBottom: theme.spacing.sm,
+  },
+  input: {
+    backgroundColor: theme.colors.surfaceSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    color: theme.colors.text,
+    fontSize: 16,
+  },
+  datePickerWrapper: {
+    marginTop: theme.spacing.md,
+    backgroundColor: theme.colors.surfaceSoft,
+    borderRadius: theme.radius.md,
+    overflow: 'hidden',
+    alignItems: 'center',
+  },
+  doneButtonWrapper: {
+    marginTop: theme.spacing.sm,
+  },
+  saveButtonWrapper: {
+    marginTop: theme.spacing.sm,
+  },
+});

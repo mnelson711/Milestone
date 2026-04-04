@@ -1,5 +1,15 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Switch, Button, ScrollView, Alert } from 'react-native';
+import {
+  View,
+  Switch,
+  ScrollView,
+  Alert,
+  StyleSheet,
+  Pressable,
+  LayoutAnimation,
+  Platform,
+  UIManager,
+} from 'react-native';
 import { AppSettings } from '../types';
 import { getSettings, saveSettings } from '../storage/settings';
 import MilestoneSelector from '../components/MilestoneSelector';
@@ -10,12 +20,26 @@ import {
   scheduleTestNotificationInFiveSeconds,
   syncAllEventNotifications,
 } from '../utils/notifications';
+import ScreenContainer from '../components/ScreenContainer';
+import SectionCard from '../components/SectionCard';
+import AppButton from '../components/AppButton';
+import AppText from '../components/AppText';
+import { theme } from '../theme/theme';
+import SectionHeader from '../components/SectionHeader';
+
+if (
+  Platform.OS === 'android' &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 export default function SettingsScreen() {
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
   const [scheduledNotificationCount, setScheduledNotificationCount] = useState(0);
   const [isResyncing, setIsResyncing] = useState(false);
+  const [showMilestoneDefaults, setShowMilestoneDefaults] = useState(false);
 
   const loadSettingsData = async () => {
     const savedSettings = await getSettings();
@@ -31,6 +55,10 @@ export default function SettingsScreen() {
   useEffect(() => {
     loadSettingsData();
   }, []);
+
+  const animateLayout = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+  };
 
   const handleToggleDefaultNotifications = async (value: boolean) => {
     if (!settings) {
@@ -64,6 +92,11 @@ export default function SettingsScreen() {
 
     setSettings(updatedSettings);
     await saveSettings(updatedSettings);
+  };
+
+  const handleToggleMilestoneDefaultsSection = () => {
+    animateLayout();
+    setShowMilestoneDefaults((current) => !current);
   };
 
   const handleRequestPermissions = async () => {
@@ -121,115 +154,197 @@ export default function SettingsScreen() {
 
   if (!settings) {
     return (
-      <View style={{ flex: 1, padding: 20 }}>
-        <Text>Loading settings...</Text>
-      </View>
+      <ScreenContainer>
+        <AppText variant="body">Loading settings...</AppText>
+      </ScreenContainer>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 20 }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 16 }}>
-        Settings
-      </Text>
+    <ScreenContainer>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <AppText variant="title" style={styles.pageTitle}>
+          Settings
+        </AppText>
+        <AppText variant="muted" style={styles.pageSubtitle}>
+          Customize defaults and manage notifications.
+        </AppText>
 
-      <View
-        style={{
-          borderWidth: 1,
-          borderRadius: 8,
-          padding: 12,
-          marginBottom: 20,
-        }}
-      >
-        <Text style={{ fontSize: 20, fontWeight: '600', marginBottom: 12 }}>
-          Defaults
-        </Text>
-
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ fontSize: 16 }}>Default notifications for new events</Text>
-          <Switch
-            value={settings.defaultNotificationsEnabled}
-            onValueChange={handleToggleDefaultNotifications}
+        <SectionCard>
+          <SectionHeader
+            title="Defaults"
+            iconName="options-outline"
+            subtitle="Choose default behavior for new events."
           />
-        </View>
 
-        <MilestoneSelector
-          selectedMilestoneIds={settings.defaultMilestoneIds}
-          onToggleMilestone={handleToggleMilestone}
-        />
-      </View>
+          <View style={styles.row}>
+            <View style={styles.rowText}>
+              <AppText variant="body">Default notifications</AppText>
+              <AppText variant="muted">
+                Enable notifications automatically for new events
+              </AppText>
+            </View>
 
-      <View
-        style={{
-          borderWidth: 1,
-          borderRadius: 8,
-          padding: 12,
-          marginBottom: 20,
-        }}
-      >
-        <Text style={{ fontSize: 20, fontWeight: '600', marginBottom: 12 }}>
-          Notifications
-        </Text>
+            <Switch
+              value={settings.defaultNotificationsEnabled}
+              onValueChange={handleToggleDefaultNotifications}
+              trackColor={{
+                false: theme.colors.border,
+                true: theme.colors.primaryDark,
+              }}
+              thumbColor={
+                settings.defaultNotificationsEnabled
+                  ? theme.colors.primary
+                  : theme.colors.textMuted
+              }
+            />
+          </View>
 
-        <Text>
-          Device permission:{' '}
-          {permissionGranted === null
-            ? 'Checking...'
-            : permissionGranted
-            ? 'Granted'
-            : 'Not granted'}
-        </Text>
+          <View style={styles.selectorContainer}>
+            <Pressable
+              onPress={handleToggleMilestoneDefaultsSection}
+              style={styles.collapsibleHeader}
+            >
+              <View style={styles.collapsibleHeaderText}>
+                <AppText variant="body" style={styles.selectorTitle}>
+                  Default milestone types
+                </AppText>
+                <AppText variant="muted">
+                  {settings.defaultMilestoneIds.length} selected
+                </AppText>
+              </View>
 
-        <Text style={{ marginTop: 8 }}>
-          Scheduled notifications: {scheduledNotificationCount}
-        </Text>
+              <AppText variant="body" style={styles.chevron}>
+                {showMilestoneDefaults ? '−' : '+'}
+              </AppText>
+            </Pressable>
 
-        <View style={{ marginTop: 12 }}>
-          <Button
-            title="Request Notification Permission"
-            onPress={handleRequestPermissions}
+            {showMilestoneDefaults ? (
+              <View style={styles.collapsibleContent}>
+                <AppText variant="muted" style={styles.selectorSubtitle}>
+                  These will be preselected when creating a new event.
+                </AppText>
+
+                <MilestoneSelector
+                  selectedMilestoneIds={settings.defaultMilestoneIds}
+                  onToggleMilestone={handleToggleMilestone}
+                />
+              </View>
+            ) : null}
+          </View>
+        </SectionCard>
+
+        <SectionCard>
+          <SectionHeader
+            title="Notifications"
+            iconName="notifications-outline"
+            subtitle="Manage permissions and scheduled notification tools."
           />
-        </View>
 
-        <View style={{ marginTop: 12 }}>
-          <Button
-            title="Test Notification in 5 Seconds"
-            onPress={handleTestNotification}
-          />
-        </View>
+          <View style={styles.statusBlock}>
+            <AppText variant="body">
+              Device permission:{' '}
+              {permissionGranted === null
+                ? 'Checking...'
+                : permissionGranted
+                ? 'Granted'
+                : 'Not granted'}
+            </AppText>
 
-        <View style={{ marginTop: 12 }}>
-          <Button
-            title={isResyncing ? 'Resyncing Notifications...' : 'Resync Notifications'}
-            onPress={handleResyncNotifications}
-            disabled={isResyncing}
-          />
-        </View>
-      </View>
+            <AppText variant="muted" style={styles.statusText}>
+              Scheduled notifications: {scheduledNotificationCount}
+            </AppText>
+          </View>
 
-      <View
-        style={{
-          borderWidth: 1,
-          borderRadius: 8,
-          padding: 12,
-          marginBottom: 20,
-        }}
-      >
-        <Text style={{ fontSize: 20, fontWeight: '600', marginBottom: 12 }}>
-          About
-        </Text>
+          <View style={styles.buttonGroup}>
+            <AppButton
+              title="Request Notification Permission"
+              onPress={handleRequestPermissions}
+              variant="secondary"
+            />
+          </View>
 
-        <Text>
-          Milestone is a personal event tracker for fun, unusual milestones and
-          milestone notifications.
-        </Text>
-      </View>
-    </ScrollView>
+          <View style={styles.buttonGroup}>
+            <AppButton
+              title="Test Notification in 5 Seconds"
+              onPress={handleTestNotification}
+            />
+          </View>
+
+          <View style={styles.buttonGroup}>
+            <AppButton
+              title={isResyncing ? 'Resyncing Notifications...' : 'Resync Notifications'}
+              onPress={handleResyncNotifications}
+              variant="secondary"
+              disabled={isResyncing}
+            />
+          </View>
+        </SectionCard>
+
+      </ScrollView>
+    </ScreenContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    paddingBottom: theme.spacing.xl,
+  },
+  pageTitle: {
+    marginBottom: theme.spacing.xs,
+  },
+  pageSubtitle: {
+    marginBottom: theme.spacing.lg,
+  },
+  sectionTitle: {
+    marginBottom: theme.spacing.md,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: theme.spacing.md,
+  },
+  rowText: {
+    flex: 1,
+  },
+  selectorContainer: {
+    marginTop: theme.spacing.lg,
+  },
+  collapsibleHeader: {
+    backgroundColor: theme.colors.surfaceSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    padding: theme.spacing.md,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  collapsibleHeaderText: {
+    flex: 1,
+  },
+  collapsibleContent: {
+    marginTop: theme.spacing.sm,
+  },
+  selectorTitle: {
+    marginBottom: theme.spacing.xs,
+  },
+  selectorSubtitle: {
+    marginBottom: theme.spacing.sm,
+  },
+  chevron: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginLeft: theme.spacing.sm,
+  },
+  statusBlock: {
+    marginBottom: theme.spacing.md,
+  },
+  statusText: {
+    marginTop: theme.spacing.xs,
+  },
+  buttonGroup: {
+    marginTop: theme.spacing.sm,
+  },
+});

@@ -2,21 +2,25 @@ import { useEffect, useState } from 'react';
 import {
   View,
   TextInput,
-  Button,
-  Text,
   Alert,
   Platform,
   ScrollView,
+  StyleSheet,
 } from 'react-native';
 import DateTimePicker, {
   DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
-import { getSettings } from '../storage/settings';
 import { addEvent } from '../storage/storage';
+import { getSettings } from '../storage/settings';
 import { EventItem } from '../types';
 import { syncEventNotifications } from '../utils/notifications';
 import MilestoneSelector from '../components/MilestoneSelector';
 import { defaultMilestoneIds } from '../utils/milestoneRules';
+import ScreenContainer from '../components/ScreenContainer';
+import SectionCard from '../components/SectionCard';
+import AppButton from '../components/AppButton';
+import AppText from '../components/AppText';
+import { theme } from '../theme/theme';
 
 type AddEventScreenProps = {
   navigation: any;
@@ -26,20 +30,21 @@ export default function AddEventScreen({ navigation }: AddEventScreenProps) {
   const [label, setLabel] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-    const [selectedMilestoneIds, setSelectedMilestoneIds] =
+  const [selectedMilestoneIds, setSelectedMilestoneIds] =
     useState<string[]>(defaultMilestoneIds);
-    const [defaultNotificationsEnabled, setDefaultNotificationsEnabled] =
+  const [defaultNotificationsEnabled, setDefaultNotificationsEnabled] =
     useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
-    useEffect(() => {
-        const loadDefaults = async () => {
-            const settings = await getSettings();
-            setSelectedMilestoneIds(settings.defaultMilestoneIds);
-            setDefaultNotificationsEnabled(settings.defaultNotificationsEnabled);
-        };
+  useEffect(() => {
+    const loadDefaults = async () => {
+      const settings = await getSettings();
+      setSelectedMilestoneIds(settings.defaultMilestoneIds);
+      setDefaultNotificationsEnabled(settings.defaultNotificationsEnabled);
+    };
 
-        loadDefaults();
-    }, []);
+    loadDefaults();
+  }, []);
 
   const handleDateChange = (event: DateTimePickerEvent, date?: Date) => {
     if (Platform.OS === 'android') {
@@ -74,60 +79,164 @@ export default function AddEventScreen({ navigation }: AddEventScreenProps) {
       return;
     }
 
-    const newEvent: EventItem = {
+    if (isSaving) {
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const newEvent: EventItem = {
         id: Date.now().toString(),
         label: trimmedLabel,
         date: selectedDate.toISOString(),
         notificationsEnabled: defaultNotificationsEnabled,
         scheduledNotificationIds: [],
         selectedMilestoneIds,
-    };
+      };
 
-    await addEvent(newEvent);
-    await syncEventNotifications(newEvent);
+      await addEvent(newEvent);
+      await syncEventNotifications(newEvent);
 
-    navigation.navigate('Home');
+      navigation.navigate('HomeMain');
+    } catch (error) {
+      console.error('Error saving event:', error);
+      Alert.alert('Error', 'Something went wrong while saving the event.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 20 }}>
-      <Text style={{ marginBottom: 6 }}>Event Name</Text>
-      <TextInput
-        value={label}
-        onChangeText={setLabel}
-        placeholder="Birthday, Wedding..."
-        style={{ borderWidth: 1, marginBottom: 16, padding: 10, borderRadius: 6 }}
-      />
+    <ScreenContainer>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <AppText variant="title" style={styles.pageTitle}>
+          Add Event
+        </AppText>
+        <AppText variant="muted" style={styles.pageSubtitle}>
+          Create a new event and choose which milestones to track.
+        </AppText>
 
-      <Text style={{ marginBottom: 6 }}>Date</Text>
-      <Button
-        title={selectedDate.toLocaleDateString()}
-        onPress={() => setShowDatePicker(true)}
-      />
+        <SectionCard>
+          <AppText variant="subtitle" style={styles.sectionTitle}>
+            Basic Info
+          </AppText>
 
-      {showDatePicker && (
-        <DateTimePicker
-          value={selectedDate}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={handleDateChange}
-        />
-      )}
+          <AppText variant="body" style={styles.label}>
+            Event Name
+          </AppText>
+          <TextInput
+            value={label}
+            onChangeText={setLabel}
+            placeholder="Birthday, Wedding..."
+            placeholderTextColor={theme.colors.textMuted}
+            style={styles.input}
+          />
+        </SectionCard>
 
-      {Platform.OS === 'ios' && showDatePicker && (
-        <View style={{ marginTop: 12 }}>
-          <Button title="Done" onPress={() => setShowDatePicker(false)} />
+        <SectionCard>
+          <AppText variant="subtitle" style={styles.sectionTitle}>
+            Event Date
+          </AppText>
+
+          <AppText variant="body" style={styles.label}>
+            Selected Date
+          </AppText>
+
+          <AppButton
+            title={selectedDate.toLocaleDateString()}
+            onPress={() => setShowDatePicker(true)}
+            variant="secondary"
+          />
+
+          {showDatePicker && (
+            <View style={styles.datePickerWrapper}>
+              <DateTimePicker
+                value={selectedDate}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={handleDateChange}
+              />
+            </View>
+          )}
+
+          {Platform.OS === 'ios' && showDatePicker && (
+            <View style={styles.doneButtonWrapper}>
+              <AppButton
+                title="Done"
+                onPress={() => setShowDatePicker(false)}
+                variant="secondary"
+              />
+            </View>
+          )}
+        </SectionCard>
+
+        <SectionCard>
+          <AppText variant="subtitle" style={styles.sectionTitle}>
+            Milestones
+          </AppText>
+          <AppText variant="muted" style={styles.sectionDescription}>
+            Choose which milestone types should apply to this event.
+          </AppText>
+
+          <MilestoneSelector
+            selectedMilestoneIds={selectedMilestoneIds}
+            onToggleMilestone={handleToggleMilestone}
+          />
+        </SectionCard>
+
+        <View style={styles.saveButtonWrapper}>
+          <AppButton
+            title={isSaving ? 'Saving Event...' : 'Save Event'}
+            onPress={handleSave}
+            disabled={isSaving}
+          />
         </View>
-      )}
-
-      <MilestoneSelector
-        selectedMilestoneIds={selectedMilestoneIds}
-        onToggleMilestone={handleToggleMilestone}
-      />
-
-      <View style={{ marginTop: 20 }}>
-        <Button title="Save Event" onPress={handleSave} />
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </ScreenContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    paddingBottom: theme.spacing.xl,
+  },
+  pageTitle: {
+    marginBottom: theme.spacing.xs,
+  },
+  pageSubtitle: {
+    marginBottom: theme.spacing.lg,
+  },
+  sectionTitle: {
+    marginBottom: theme.spacing.md,
+  },
+  sectionDescription: {
+    marginBottom: theme.spacing.sm,
+  },
+  label: {
+    marginBottom: theme.spacing.sm,
+  },
+  input: {
+    backgroundColor: theme.colors.surfaceSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    color: theme.colors.text,
+    fontSize: 16,
+  },
+  datePickerWrapper: {
+    marginTop: theme.spacing.md,
+    backgroundColor: theme.colors.surfaceSoft,
+    borderRadius: theme.radius.md,
+    overflow: 'hidden',
+    alignItems: 'center',
+  },
+  doneButtonWrapper: {
+    marginTop: theme.spacing.sm,
+  },
+  saveButtonWrapper: {
+    marginTop: theme.spacing.sm,
+  },
+});
