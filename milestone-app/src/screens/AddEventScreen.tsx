@@ -2,14 +2,15 @@ import { useEffect, useState } from 'react';
 import {
   View,
   TextInput,
-  Alert,
   Platform,
   ScrollView,
   StyleSheet,
+  Pressable,
 } from 'react-native';
 import DateTimePicker, {
   DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
+import { Ionicons } from '@expo/vector-icons';
 import { addEvent } from '../storage/storage';
 import { getSettings } from '../storage/settings';
 import { EventItem } from '../types';
@@ -20,10 +21,19 @@ import ScreenContainer from '../components/ScreenContainer';
 import SectionCard from '../components/SectionCard';
 import AppButton from '../components/AppButton';
 import AppText from '../components/AppText';
+import SectionHeader from '../components/SectionHeader';
+import AppModal from '../components/AppModal';
+import AlertModal from '../components/AlertModal';
 import { useTheme } from '../context/ThemeContext';
 
 type AddEventScreenProps = {
   navigation: any;
+};
+
+type ModalAlertState = {
+  visible: boolean;
+  title: string;
+  message: string;
 };
 
 export default function AddEventScreen({ navigation }: AddEventScreenProps) {
@@ -35,8 +45,13 @@ export default function AddEventScreen({ navigation }: AddEventScreenProps) {
   const [defaultNotificationsEnabled, setDefaultNotificationsEnabled] =
     useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const { theme } = useTheme();
+  const [alertState, setAlertState] = useState<ModalAlertState>({
+    visible: false,
+    title: '',
+    message: '',
+  });
 
+  const { theme } = useTheme();
 
   useEffect(() => {
     const loadDefaults = async () => {
@@ -47,6 +62,22 @@ export default function AddEventScreen({ navigation }: AddEventScreenProps) {
 
     loadDefaults();
   }, []);
+
+  const showAlert = (title: string, message: string) => {
+    setAlertState({
+      visible: true,
+      title,
+      message,
+    });
+  };
+
+  const closeAlert = () => {
+    setAlertState({
+      visible: false,
+      title: '',
+      message: '',
+    });
+  };
 
   const handleDateChange = (event: DateTimePickerEvent, date?: Date) => {
     if (Platform.OS === 'android') {
@@ -72,12 +103,15 @@ export default function AddEventScreen({ navigation }: AddEventScreenProps) {
     const trimmedLabel = label.trim();
 
     if (!trimmedLabel) {
-      Alert.alert('Missing information', 'Please enter an event name.');
+      showAlert('Missing information', 'Please enter an event name.');
       return;
     }
 
     if (selectedMilestoneIds.length === 0) {
-      Alert.alert('Missing milestones', 'Please select at least one milestone type.');
+      showAlert(
+        'Missing milestones',
+        'Please select at least one milestone type.'
+      );
       return;
     }
 
@@ -103,143 +137,202 @@ export default function AddEventScreen({ navigation }: AddEventScreenProps) {
       navigation.navigate('HomeMain');
     } catch (error) {
       console.error('Error saving event:', error);
-      Alert.alert('Error', 'Something went wrong while saving the event.');
+      showAlert('Error', 'Something went wrong while saving the event.');
     } finally {
       setIsSaving(false);
     }
   };
 
-
-const styles = StyleSheet.create({
-  scrollContent: {
-    paddingBottom: theme.spacing.xl,
-  },
-  pageTitle: {
-    marginBottom: theme.spacing.xs,
-  },
-  pageSubtitle: {
-    marginBottom: theme.spacing.lg,
-  },
-  sectionTitle: {
-    marginBottom: theme.spacing.md,
-  },
-  sectionDescription: {
-    marginBottom: theme.spacing.sm,
-  },
-  label: {
-    marginBottom: theme.spacing.sm,
-  },
-  input: {
-    backgroundColor: theme.colors.surfaceSoft,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.md,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    color: theme.colors.text,
-    fontSize: 16,
-  },
-  datePickerWrapper: {
-    marginTop: theme.spacing.md,
-    backgroundColor: theme.colors.surfaceSoft,
-    borderRadius: theme.radius.md,
-    overflow: 'hidden',
-    alignItems: 'center',
-  },
-  doneButtonWrapper: {
-    marginTop: theme.spacing.sm,
-  },
-  saveButtonWrapper: {
-    marginTop: theme.spacing.sm,
-  },
-});
+  const styles = StyleSheet.create({
+    root: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingBottom: theme.spacing.xl,
+    },
+    pageTitle: {
+      marginBottom: theme.spacing.xs,
+    },
+    pageSubtitle: {
+      marginBottom: theme.spacing.lg,
+    },
+    label: {
+      marginBottom: theme.spacing.sm,
+    },
+    input: {
+      backgroundColor: theme.colors.surfaceSoft,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: theme.radius.md,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      color: theme.colors.text,
+      fontSize: 16,
+    },
+    detailsRowSpacing: {
+      marginTop: theme.spacing.lg,
+    },
+    dateField: {
+      backgroundColor: theme.colors.surfaceSoft,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: theme.radius.md,
+      paddingVertical: 14,
+      paddingHorizontal: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    dateFieldLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    dateFieldText: {
+      marginLeft: theme.spacing.sm,
+    },
+    bottomBar: {
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border,
+      backgroundColor: theme.colors.background,
+      paddingTop: theme.spacing.md,
+      paddingBottom: theme.spacing.md,
+    },
+    modalTitle: {
+      marginBottom: theme.spacing.xs,
+    },
+    modalSubtitle: {
+      marginBottom: theme.spacing.lg,
+    },
+    modalActions: {
+      marginTop: theme.spacing.md,
+    },
+  });
 
   return (
     <ScreenContainer>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <AppText variant="title" style={styles.pageTitle}>
-          Add Event
-        </AppText>
-        <AppText variant="muted" style={styles.pageSubtitle}>
-          Create a new event and choose which milestones to track.
-        </AppText>
-
-        <SectionCard>
-          <AppText variant="subtitle" style={styles.sectionTitle}>
-            Basic Info
+      <View style={styles.root}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <AppText variant="title" style={styles.pageTitle}>
+            Add Event
           </AppText>
 
-          <AppText variant="body" style={styles.label}>
-            Event Name
-          </AppText>
-          <TextInput
-            value={label}
-            onChangeText={setLabel}
-            placeholder="Birthday, Wedding..."
-            placeholderTextColor={theme.colors.textMuted}
-            style={styles.input}
-          />
-        </SectionCard>
-
-        <SectionCard>
-          <AppText variant="subtitle" style={styles.sectionTitle}>
-            Event Date
+          <AppText variant="muted" style={styles.pageSubtitle}>
+            Create a new event and choose which milestones to track.
           </AppText>
 
-          <AppText variant="body" style={styles.label}>
-            Selected Date
-          </AppText>
+          <SectionCard>
+            <SectionHeader
+              title="Event Details"
+              iconName="calendar-outline"
+              subtitle="Start with the basics."
+            />
 
-          <AppButton
-            title={selectedDate.toLocaleDateString()}
-            onPress={() => setShowDatePicker(true)}
-            variant="secondary"
-          />
+            <AppText variant="body" style={styles.label}>
+              Event Name
+            </AppText>
 
-          {showDatePicker && (
-            <View style={styles.datePickerWrapper}>
-              <DateTimePicker
-                value={selectedDate}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={handleDateChange}
-              />
+            <TextInput
+              value={label}
+              onChangeText={setLabel}
+              placeholder="Birthday, Wedding, Graduation..."
+              placeholderTextColor={theme.colors.textMuted}
+              style={styles.input}
+              returnKeyType="done"
+            />
+
+            <View style={styles.detailsRowSpacing}>
+              <AppText variant="body" style={styles.label}>
+                Event Date
+              </AppText>
+
+              <Pressable
+                onPress={() => setShowDatePicker(true)}
+                style={styles.dateField}
+              >
+                <View style={styles.dateFieldLeft}>
+                  <Ionicons
+                    name="time-outline"
+                    size={18}
+                    color={theme.colors.primary}
+                  />
+                  <AppText variant="body" style={styles.dateFieldText}>
+                    {selectedDate.toLocaleDateString()}
+                  </AppText>
+                </View>
+
+                <Ionicons
+                  name="chevron-forward-outline"
+                  size={18}
+                  color={theme.colors.textMuted}
+                />
+              </Pressable>
             </View>
-          )}
+          </SectionCard>
 
-          {Platform.OS === 'ios' && showDatePicker && (
-            <View style={styles.doneButtonWrapper}>
-              <AppButton
-                title="Done"
-                onPress={() => setShowDatePicker(false)}
-                variant="secondary"
-              />
-            </View>
-          )}
-        </SectionCard>
+          <SectionCard>
+            <SectionHeader
+              title="Milestones"
+              iconName="trophy-outline"
+              subtitle="Choose which milestone types should apply to this event."
+            />
 
-        <SectionCard>
-          <AppText variant="subtitle" style={styles.sectionTitle}>
-            Milestones
-          </AppText>
-          <AppText variant="muted" style={styles.sectionDescription}>
-            Choose which milestone types should apply to this event.
-          </AppText>
+            <MilestoneSelector
+              selectedMilestoneIds={selectedMilestoneIds}
+              onToggleMilestone={handleToggleMilestone}
+            />
+          </SectionCard>
+        </ScrollView>
 
-          <MilestoneSelector
-            selectedMilestoneIds={selectedMilestoneIds}
-            onToggleMilestone={handleToggleMilestone}
-          />
-        </SectionCard>
-
-        <View style={styles.saveButtonWrapper}>
+        <View style={styles.bottomBar}>
           <AppButton
             title={isSaving ? 'Saving Event...' : 'Save Event'}
             onPress={handleSave}
             disabled={isSaving}
           />
         </View>
-      </ScrollView>
+      </View>
+
+      <AppModal
+        visible={showDatePicker}
+        onRequestClose={() => setShowDatePicker(false)}
+      >
+        <AppText variant="subtitle" style={styles.modalTitle}>
+          Select Date
+        </AppText>
+
+        <AppText variant="muted" style={styles.modalSubtitle}>
+          Choose the date for this event.
+        </AppText>
+
+        <DateTimePicker
+          value={selectedDate}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={handleDateChange}
+        />
+
+        {Platform.OS === 'ios' ? (
+          <View style={styles.modalActions}>
+            <AppButton
+              title="Done"
+              onPress={() => setShowDatePicker(false)}
+              variant="secondary"
+            />
+          </View>
+        ) : null}
+      </AppModal>
+
+      <AlertModal
+        visible={alertState.visible}
+        title={alertState.title}
+        message={alertState.message}
+        onClose={closeAlert}
+      />
     </ScreenContainer>
   );
 }

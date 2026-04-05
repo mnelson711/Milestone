@@ -3,17 +3,18 @@ import { View, FlatList, Switch, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getUpcomingMilestones, getNextUpcomingMilestone } from '../utils/milestones';
 import { EventItem } from '../types';
-import { getEventById, updateEvent } from '../storage/storage';
+import { getEventById, updateEvent, deleteEvent } from '../storage/storage';
 import {
   syncEventNotifications,
   getNotificationPermissionStatus,
+  cancelScheduledNotifications,
 } from '../utils/notifications';
 import ScreenContainer from '../components/ScreenContainer';
 import SectionCard from '../components/SectionCard';
 import AppButton from '../components/AppButton';
 import AppText from '../components/AppText';
+import ConfirmModal from '../components/ConfirmModal';
 import { useTheme } from '../context/ThemeContext';
-
 import SectionHeader from '../components/SectionHeader';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -37,9 +38,10 @@ export default function EventDetailsScreen({
   const [isSavingNotificationPreference, setIsSavingNotificationPreference] =
     useState(false);
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { theme } = useTheme();
-
 
   const loadEvent = useCallback(async () => {
     setIsLoading(true);
@@ -85,6 +87,41 @@ export default function EventDetailsScreen({
     }
   };
 
+  const handleAskDelete = () => {
+    if (isDeleting) {
+      return;
+    }
+
+    setShowDeleteConfirm(true);
+  };
+
+  const handleCancelDelete = () => {
+    if (isDeleting) {
+      return;
+    }
+
+    setShowDeleteConfirm(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!event || isDeleting) {
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      await cancelScheduledNotifications(event.scheduledNotificationIds);
+      await deleteEvent(event.id);
+      setShowDeleteConfirm(false);
+      navigation.navigate('HomeMain');
+    } catch (error) {
+      console.error('Error deleting event:', error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <ScreenContainer>
@@ -104,242 +141,282 @@ export default function EventDetailsScreen({
   const milestones = getUpcomingMilestones(event, 4);
   const nextMilestone = getNextUpcomingMilestone(event);
 
-
-const styles = StyleSheet.create({
-  listContent: {
-    paddingBottom: theme.spacing.xl,
-  },
-  pageTitle: {
-    marginBottom: theme.spacing.xs,
-  },
-  pageSubtitle: {
-    marginBottom: theme.spacing.lg,
-  },
-  sectionTitle: {
-    marginBottom: theme.spacing.md,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: theme.spacing.md,
-    marginBottom: theme.spacing.sm,
-  },
-  infoLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  infoLabelText: {
-    marginLeft: theme.spacing.xs,
-  },
-  editButtonWrapper: {
-    marginTop: theme.spacing.sm,
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: theme.spacing.md,
-    marginBottom: theme.spacing.md,
-  },
-  toggleText: {
-    flex: 1,
-  },
-  statusBlock: {
-    marginBottom: theme.spacing.md,
-  },
-  statusMessage: {
-    marginTop: theme.spacing.xs,
-  },
-  nextMilestoneBlock: {
-    backgroundColor: theme.colors.surfaceSoft,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.md,
-    padding: theme.spacing.md,
-  },
-  blockLabel: {
-    marginBottom: theme.spacing.xs,
-  },
-  nextMilestoneTitle: {
-    marginBottom: theme.spacing.xs,
-  },
-  milestonesHeader: {
-    marginBottom: theme.spacing.sm,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  milestoneTitle: {
-    marginBottom: theme.spacing.xs,
-  },
-  milestoneDescription: {
-    marginBottom: theme.spacing.md,
-  },
-  milestoneMeta: {
-    gap: theme.spacing.xs,
-  },
-});
+  const styles = StyleSheet.create({
+    listContent: {
+      paddingBottom: theme.spacing.xl,
+    },
+    pageTitle: {
+      marginBottom: theme.spacing.xs,
+    },
+    pageSubtitle: {
+      marginBottom: theme.spacing.lg,
+    },
+    infoRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: theme.spacing.md,
+      marginBottom: theme.spacing.sm,
+    },
+    infoLabelRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    infoLabelText: {
+      marginLeft: theme.spacing.xs,
+    },
+    editButtonWrapper: {
+      marginTop: theme.spacing.sm,
+    },
+    toggleRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: theme.spacing.md,
+      marginBottom: theme.spacing.md,
+    },
+    toggleText: {
+      flex: 1,
+    },
+    statusBlock: {
+      marginBottom: theme.spacing.md,
+    },
+    statusMessage: {
+      marginTop: theme.spacing.xs,
+    },
+    nextMilestoneBlock: {
+      backgroundColor: theme.colors.surfaceSoft,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: theme.radius.md,
+      padding: theme.spacing.md,
+    },
+    blockLabel: {
+      marginBottom: theme.spacing.xs,
+    },
+    nextMilestoneTitle: {
+      marginBottom: theme.spacing.xs,
+    },
+    milestonesHeader: {
+      marginBottom: theme.spacing.sm,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    milestoneTitle: {
+      marginBottom: theme.spacing.xs,
+    },
+    milestoneDescription: {
+      marginBottom: theme.spacing.md,
+    },
+    milestoneMeta: {
+      gap: theme.spacing.xs,
+    },
+    deleteSectionText: {
+      marginBottom: theme.spacing.md,
+    },
+  });
 
   return (
     <ScreenContainer>
-      <FlatList
-        data={milestones}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        ListHeaderComponent={
-          <>
-            <AppText variant="title" style={styles.pageTitle}>
-              {event.label}
-            </AppText>
-            <AppText variant="muted" style={styles.pageSubtitle}>
-              {new Date(event.date).toLocaleDateString()}
-            </AppText>
+      <>
+        <FlatList
+          data={milestones}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          ListHeaderComponent={
+            <>
+              <AppText variant="title" style={styles.pageTitle}>
+                {event.label}
+              </AppText>
 
-            <SectionCard>
-              <SectionHeader
-                title="Event Overview"
-                iconName="calendar-outline"
-              />
+              <AppText variant="muted" style={styles.pageSubtitle}>
+                {new Date(event.date).toLocaleDateString()}
+              </AppText>
 
-              <View style={styles.infoRow}>
-                <AppText variant="body">Date</AppText>
-                <AppText variant="muted">
-                  {new Date(event.date).toLocaleDateString()}
-                </AppText>
-              </View>
-
-              <View style={styles.infoRow}>
-                <AppText variant="body">Tracked milestone types</AppText>
-                <AppText variant="muted">
-                  {event.selectedMilestoneIds?.length ?? 0}
-                </AppText>
-              </View>
-
-              <View style={styles.infoRow}>
-                <View style={styles.infoLabelRow}>
-                  <Ionicons name="time-outline" size={16} color={theme.colors.textMuted} />
-                  <AppText variant="body" style={styles.infoLabelText}>Date</AppText>
-                </View>
-                <AppText variant="muted">
-                  {new Date(event.date).toLocaleDateString()}
-                </AppText>
-              </View>
-
-              <View style={styles.editButtonWrapper}>
-                <AppButton
-                  title="Edit Event"
-                  onPress={() => navigation.navigate('Edit Event', { eventId: event.id })}
-                  variant="secondary"
+              <SectionCard>
+                <SectionHeader
+                  title="Event Overview"
+                  iconName="calendar-outline"
                 />
-              </View>
-            </SectionCard>
 
-            <SectionCard>
-              <SectionHeader
-                title="Notifications"
-                iconName="notifications-outline"
-              />
-
-              <View style={styles.toggleRow}>
-                <View style={styles.toggleText}>
-                  <AppText variant="body">Notifications</AppText>
+                <View style={styles.infoRow}>
+                  <AppText variant="body">Tracked milestone types</AppText>
                   <AppText variant="muted">
-                    {event.notificationsEnabled === false ? 'Off' : 'On'}
+                    {event.selectedMilestoneIds?.length ?? 0}
                   </AppText>
                 </View>
 
-                <Switch
-                  value={event.notificationsEnabled !== false}
-                  onValueChange={handleToggleNotifications}
-                  disabled={isSavingNotificationPreference}
-                  trackColor={{
-                    false: theme.colors.border,
-                    true: theme.colors.primaryDark,
-                  }}
-                  thumbColor={
-                    event.notificationsEnabled !== false
-                      ? theme.colors.primary
-                      : theme.colors.textMuted
-                  }
+                <View style={styles.infoRow}>
+                  <View style={styles.infoLabelRow}>
+                    <Ionicons
+                      name="time-outline"
+                      size={16}
+                      color={theme.colors.textMuted}
+                    />
+                    <AppText variant="body" style={styles.infoLabelText}>
+                      Date
+                    </AppText>
+                  </View>
+                  <AppText variant="muted">
+                    {new Date(event.date).toLocaleDateString()}
+                  </AppText>
+                </View>
+
+                <View style={styles.editButtonWrapper}>
+                  <AppButton
+                    title="Edit Event"
+                    onPress={() =>
+                      navigation.navigate('Edit Event', { eventId: event.id })
+                    }
+                    variant="secondary"
+                  />
+                </View>
+                <View style={styles.editButtonWrapper}>
+                  <AppButton
+                    title={isDeleting ? 'Deleting Event...' : 'Delete Event'}
+                    onPress={handleAskDelete}
+                    variant="danger"
+                    disabled={isDeleting}
+                  />
+                </View>
+              </SectionCard>
+
+              <SectionCard>
+                <SectionHeader
+                  title="Notifications"
+                  iconName="notifications-outline"
                 />
-              </View>
 
-              <View style={styles.statusBlock}>
-                <AppText variant="body">
-                  Device permission:{' '}
-                  {permissionGranted === null
-                    ? 'Checking...'
-                    : permissionGranted
-                    ? 'Granted'
-                    : 'Not granted'}
-                </AppText>
+                <View style={styles.toggleRow}>
+                  <View style={styles.toggleText}>
+                    <AppText variant="body">Notifications</AppText>
+                    <AppText variant="muted">
+                      {event.notificationsEnabled === false ? 'Off' : 'On'}
+                    </AppText>
+                  </View>
 
-                {event.notificationsEnabled !== false && !permissionGranted ? (
+                  <Switch
+                    value={event.notificationsEnabled !== false}
+                    onValueChange={handleToggleNotifications}
+                    disabled={isSavingNotificationPreference}
+                    trackColor={{
+                      false: theme.colors.border,
+                      true: theme.colors.primaryDark,
+                    }}
+                    thumbColor={
+                      event.notificationsEnabled !== false
+                        ? theme.colors.primary
+                        : theme.colors.textMuted
+                    }
+                  />
+                </View>
+
+                <View style={styles.statusBlock}>
+                  <AppText variant="body">
+                    Device permission:{' '}
+                    {permissionGranted === null
+                      ? 'Checking...'
+                      : permissionGranted
+                      ? 'Granted'
+                      : 'Not granted'}
+                  </AppText>
+
+                  {event.notificationsEnabled !== false && !permissionGranted ? (
+                    <AppText variant="muted" style={styles.statusMessage}>
+                      Notifications are enabled for this event, but device permission is off.
+                    </AppText>
+                  ) : null}
+                </View>
+
+                {nextMilestone ? (
+                  <View style={styles.nextMilestoneBlock}>
+                    <AppText variant="body" style={styles.blockLabel}>
+                      Next tracked milestone
+                    </AppText>
+                    <AppText variant="subtitle" style={styles.nextMilestoneTitle}>
+                      {nextMilestone.label}
+                    </AppText>
+                    <AppText variant="muted">
+                      {nextMilestone.targetDate.toLocaleDateString()}
+                    </AppText>
+                    <AppText variant="muted">
+                      {nextMilestone.timeRemainingText}
+                    </AppText>
+                  </View>
+                ) : (
                   <AppText variant="muted" style={styles.statusMessage}>
-                    Notifications are enabled for this event, but device permission is off.
+                    No upcoming milestone available.
                   </AppText>
-                ) : null}
+                )}
+              </SectionCard>
+
+              <View style={styles.milestonesHeader}>
+                <SectionHeader
+                  title="Upcoming Milestones"
+                  iconName="trophy-outline"
+                />
+                <AppText variant="muted">{milestones.length} shown</AppText>
               </View>
+            </>
+          }
+          renderItem={({ item }) => (
+            <SectionCard>
+              <AppText variant="subtitle" style={styles.milestoneTitle}>
+                {item.label}
+              </AppText>
+              <AppText variant="muted" style={styles.milestoneDescription}>
+                {item.description}
+              </AppText>
 
-              {nextMilestone ? (
-                <View style={styles.nextMilestoneBlock}>
-                  <AppText variant="body" style={styles.blockLabel}>
-                    Next tracked milestone
-                  </AppText>
-                  <AppText variant="subtitle" style={styles.nextMilestoneTitle}>
-                    {nextMilestone.label}
-                  </AppText>
-                  <AppText variant="muted">
-                    {nextMilestone.targetDate.toLocaleDateString()}
-                  </AppText>
-                  <AppText variant="muted">
-                    {nextMilestone.timeRemainingText}
-                  </AppText>
-                </View>
-              ) : (
-                <AppText variant="muted" style={styles.statusMessage}>
-                  No upcoming milestone available.
+              <View style={styles.milestoneMeta}>
+                <AppText variant="body">
+                  {item.targetDate.toLocaleDateString()}
                 </AppText>
-              )}
+                <AppText variant="muted">
+                  {item.timeRemainingText}
+                </AppText>
+              </View>
             </SectionCard>
-
-            <View style={styles.milestonesHeader}>
+          )}
+          ListFooterComponent={
+            <SectionCard>
               <SectionHeader
-                title="Upcoming Milestones"
-                iconName="trophy-outline"
+                title="Danger Zone"
+                iconName="warning-outline"
               />
-              <AppText variant="muted">
-                {milestones.length} shown
-              </AppText>
-            </View>
-          </>
-        }
-        renderItem={({ item }) => (
-          <SectionCard>
-            <AppText variant="subtitle" style={styles.milestoneTitle}>
-              {item.label}
-            </AppText>
-            <AppText variant="muted" style={styles.milestoneDescription}>
-              {item.description}
-            </AppText>
 
-            <View style={styles.milestoneMeta}>
-              <AppText variant="body">
-                {item.targetDate.toLocaleDateString()}
+              <AppText variant="muted" style={styles.deleteSectionText}>
+                Deleting this event will also remove its scheduled notifications.
               </AppText>
-              <AppText variant="muted">
-                {item.timeRemainingText}
-              </AppText>
-            </View>
-          </SectionCard>
-        )}
-        ListEmptyComponent={
-          <SectionCard>
-            <AppText variant="body">No milestones available.</AppText>
-          </SectionCard>
-        }
-      />
+
+              <AppButton
+                title={isDeleting ? 'Deleting Event...' : 'Delete Event'}
+                onPress={handleAskDelete}
+                variant="danger"
+                disabled={isDeleting}
+              />
+            </SectionCard>
+          }
+          ListEmptyComponent={
+            <SectionCard>
+              <AppText variant="body">No milestones available.</AppText>
+            </SectionCard>
+          }
+        />
+
+        <ConfirmModal
+          visible={showDeleteConfirm}
+          title="Delete event?"
+          message={`Are you sure you want to delete "${event.label}"? This will also remove its scheduled notifications.`}
+          confirmText="Delete Event"
+          cancelText="Keep Event"
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+          isDestructive
+          isLoading={isDeleting}
+        />
+      </>
     </ScreenContainer>
   );
 }

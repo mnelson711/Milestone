@@ -1,18 +1,15 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { View, FlatList, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import { getEvents, deleteEvent } from '../storage/storage';
+import { getEvents } from '../storage/storage';
 import { EventItem } from '../types';
 import { getNextUpcomingMilestone } from '../utils/milestones';
-import { cancelScheduledNotifications } from '../utils/notifications';
 import ScreenContainer from '../components/ScreenContainer';
 import SectionCard from '../components/SectionCard';
 import AppButton from '../components/AppButton';
 import AppText from '../components/AppText';
-import ConfirmModal from '../components/ConfirmModal';
 import { useTheme } from '../context/ThemeContext';
-
 import SectionHeader from '../components/SectionHeader';
 import EmptyState from '../components/EmptyState';
 
@@ -22,10 +19,7 @@ type HomeScreenProps = {
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [events, setEvents] = useState<EventItem[]>([]);
-  const [eventToDelete, setEventToDelete] = useState<EventItem | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
   const { theme } = useTheme();
-
 
   const loadEvents = async () => {
     const storedEvents = await getEvents();
@@ -58,168 +52,206 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }, [])
   );
 
-  const handleAskDelete = (event: EventItem) => {
-    setEventToDelete(event);
-  };
+  const nextEvent = useMemo(() => {
+    return events.find((event) => getNextUpcomingMilestone(event)) ?? null;
+  }, [events]);
 
-  const handleCancelDelete = () => {
-    if (isDeleting) {
-      return;
-    }
+  const nextMilestone = useMemo(() => {
+    return nextEvent ? getNextUpcomingMilestone(nextEvent) : null;
+  }, [nextEvent]);
 
-    setEventToDelete(null);
-  };
+  const styles = StyleSheet.create({
+    pageTitle: {
+      marginBottom: theme.spacing.xs,
+    },
+    pageSubtitle: {
+      marginBottom: theme.spacing.lg,
+    },
+    listContent: {
+      paddingBottom: theme.spacing.xl,
+    },
+    headerSpacing: {
+      marginBottom: theme.spacing.lg,
+    },
+    sectionSpacing: {
+      marginBottom: theme.spacing.lg,
+    },
+    cardBody: {
+      marginBottom: theme.spacing.md,
+    },
+    title: {
+      flex: 1,
+    },
+    metaRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: theme.spacing.xs,
+    },
+    metaRight: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    metaText: {
+      marginLeft: 4,
+    },
+    milestoneRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      marginTop: theme.spacing.md,
+    },
+    milestoneText: {
+      marginLeft: theme.spacing.sm,
+      flex: 1,
+    },
+    milestoneLabel: {
+      marginBottom: 2,
+    },
+    noMilestone: {
+      marginTop: theme.spacing.xs,
+    },
+    upNextCard: {
+      marginTop: theme.spacing.sm,
+    },
 
-  const handleConfirmDelete = async () => {
-    if (!eventToDelete || isDeleting) {
-      return;
-    }
+    upNextMilestoneRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      marginTop: theme.spacing.md,
+    },
+    upNextMilestoneText: {
+      marginLeft: theme.spacing.sm,
+      flex: 1,
+    },
 
-    setIsDeleting(true);
+    upNextFeaturedCard: {
+  marginTop: theme.spacing.xs,
+  backgroundColor: 'rgba(167, 139, 250, 0.12)',
+  borderWidth: 1,
+  borderColor: theme.colors.primary,
+  borderRadius: theme.radius.md,
+  padding: theme.spacing.md,
+        marginBottom: theme.spacing.md,
 
-    try {
-      await cancelScheduledNotifications(eventToDelete.scheduledNotificationIds);
-      await deleteEvent(eventToDelete.id);
-      await loadEvents();
-      setEventToDelete(null);
-    } catch (error) {
-      console.error('Error deleting event:', error);
-    } finally {
-      setIsDeleting(false);
-    }
-  };
+},
 
+upNextBadgeRow: {
+  flexDirection: 'row',
+  marginBottom: theme.spacing.md,
+},
 
-const styles = StyleSheet.create({
-  pageTitle: {
-    marginBottom: theme.spacing.xs,
-  },
-  pageSubtitle: {
-    marginBottom: theme.spacing.lg,
-  },
-  sectionHeader: {
-    marginTop: theme.spacing.lg,
-    marginBottom: theme.spacing.sm,
-  },
-  listContent: {
-    paddingBottom: theme.spacing.xl,
-  },
-  cardBody: {
-    marginBottom: theme.spacing.md,
-  },
-  dateText: {
-    marginTop: theme.spacing.xs,
-  },
-  milestoneBlock: {
-    marginTop: theme.spacing.md,
-  },
-  blockLabel: {
-    marginBottom: theme.spacing.xs,
-  },
-  notificationsText: {
-    marginTop: theme.spacing.md,
-  },
-  footerRow: {
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-    paddingTop: theme.spacing.sm,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  inlineLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: theme.spacing.md,
-  },
-  inlineLabelText: {
-    marginLeft: theme.spacing.xs,
-  },
-  topRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
+upNextBadge: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  alignSelf: 'flex-start',
+  paddingVertical: 6,
+  paddingHorizontal: 10,
+  borderRadius: 999,
+  backgroundColor: 'rgba(167, 139, 250, 0.16)',
+  borderWidth: 1,
+  borderColor: 'rgba(167, 139, 250, 0.35)',
+},
 
-  title: {
-    flex: 1,
-  },
+upNextBadgeText: {
+  marginLeft: theme.spacing.xs,
+  color: theme.colors.primary,
+},
 
-  metaRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
+upNextEventTitle: {
+  marginBottom: theme.spacing.xs,
+},
 
-  metaRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+upNextMilestoneLabel: {
+  marginBottom: theme.spacing.md,
+},
 
-  metaText: {
-    marginLeft: 4,
-  },
+upNextTimeRow: {
+  flexDirection: 'row',
+  alignItems: 'center',
+},
 
-  milestoneRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginTop: theme.spacing.xs,
-  },
+upNextTimeText: {
+  marginLeft: theme.spacing.xs,
+  color: theme.colors.text,
+  fontWeight: '600',
+},
 
-  milestoneText: {
-    marginLeft: theme.spacing.sm,
-    flex: 1,
-  },
+upNextDateText: {
+  marginTop: theme.spacing.xs,
+},
+  });
 
-  milestoneLabel: {
-    marginBottom: 2,
-  },
+  const renderListHeader = () => (
+    <View>
 
-  noMilestone: {
-    marginTop: theme.spacing.xs,
-  },
+      {nextEvent && nextMilestone ? (
+            <Pressable
+              style={styles.upNextFeaturedCard}
+              onPress={() =>
+                navigation.navigate('Event Details', { eventId: nextEvent.id })
+              }
+            >
+              <View style={styles.upNextBadgeRow}>
+                <View style={styles.upNextBadge}>
+                  <Ionicons
+                    name="sparkles-outline"
+                    size={14}
+                    color={theme.colors.primary}
+                  />
+                  <AppText variant="muted" style={styles.upNextBadgeText}>
+                    Up Next
+                  </AppText>
+                </View>
+              </View>
 
-  deleteButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(248, 113, 113, 0.1)',
-    borderWidth: 1,
-    borderColor: theme.colors.danger,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+              <AppText variant="subtitle" style={styles.upNextEventTitle}>
+                {nextEvent.label}
+              </AppText>
 
-  deleteButtonPressed: {
-    opacity: 0.7,
-    transform: [{ scale: 0.95 }],
-  },
-});
+              <AppText variant="body" style={styles.upNextMilestoneLabel}>
+                {nextMilestone.label}
+              </AppText>
 
-  return (
-    <ScreenContainer>
-      <AppText variant="title" style={styles.pageTitle}>
-        Milestone
-      </AppText>
-      <AppText variant="muted" style={styles.pageSubtitle}>
-        Track life through unusual milestones.
-      </AppText>
+              <View style={styles.upNextTimeRow}>
+                <Ionicons
+                  name="time-outline"
+                  size={16}
+                  color={theme.colors.primary}
+                />
+                <AppText variant="body" style={styles.upNextTimeText}>
+                  {nextMilestone.timeRemainingText}
+                </AppText>
+              </View>
 
-    {events.length > 0
-      && <AppButton
-        title="Add Event"
-        onPress={() => navigation.navigate('Add Event')}
-      />
-    }
-      <View style={styles.sectionHeader}>
+              <AppText variant="muted" style={styles.upNextDateText}>
+                {nextMilestone.targetDate.toLocaleDateString()}
+              </AppText>
+            </Pressable>
+      ) : null}
+
+      <View style={styles.sectionSpacing}>
         <SectionHeader
-          title={`Your Events (${events.length})`}
+          title={`Events (${events.length})`}
           iconName="bookmark-outline"
           subtitle="Tap a card to view details."
         />
       </View>
 
-        {events.length === 0 ? (
+            <View style={styles.sectionSpacing}>
+        <AppButton
+          title={events.length === 0 ? 'Create Your First Event' : 'Add Event'}
+          onPress={() => navigation.navigate('Add Event')}
+        />
+      </View>
+    </View>
+
+    
+  );
+
+  return (
+    <ScreenContainer>
+      {events.length === 0 ? (
+        <View>
           <EmptyState
             iconName="calendar-clear-outline"
             title="No events yet"
@@ -227,13 +259,15 @@ const styles = StyleSheet.create({
             buttonText="Create Your First Event"
             onPressButton={() => navigation.navigate('Add Event')}
           />
-        ) : (
+        </View>
+      ) : (
         <FlatList
           data={events}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
+          ListHeaderComponent={renderListHeader}
           renderItem={({ item }) => {
-            const nextMilestone = getNextUpcomingMilestone(item);
+            const itemNextMilestone = getNextUpcomingMilestone(item);
 
             return (
               <SectionCard>
@@ -243,48 +277,17 @@ const styles = StyleSheet.create({
                   }
                   style={styles.cardBody}
                 >
-                  {/* Top row */}
-                  <View style={styles.topRow}>
-                    <AppText variant="subtitle" style={styles.title}>
-                      {item.label}
-                    </AppText>
+                  <AppText variant="subtitle" style={styles.title}>
+                    {item.label}
+                  </AppText>
 
-                    <Pressable
-                      onPress={() => handleAskDelete(item)}
-                      style={({ pressed }) => [
-                        styles.deleteButton,
-                        pressed && styles.deleteButtonPressed,
-                      ]}
-                      hitSlop={8}
-                    >
-                      <Ionicons
-                        name="trash-outline"
-                        size={18}
-                        color={theme.colors.danger}
-                      />
-                    </Pressable>
-                  </View>
-
-                  {/* Meta row */}
                   <View style={styles.metaRow}>
                     <AppText variant="muted">
                       {new Date(item.date).toLocaleDateString()}
                     </AppText>
-
-                    <View style={styles.metaRight}>
-                      <Ionicons
-                        name="notifications-outline"
-                        size={14}
-                        color={theme.colors.textMuted}
-                      />
-                      <AppText variant="muted" style={styles.metaText}>
-                        {item.scheduledNotificationIds?.length ?? 0}
-                      </AppText>
-                    </View>
                   </View>
 
-                  {/* Next milestone */}
-                  {nextMilestone ? (
+                  {itemNextMilestone ? (
                     <View style={styles.milestoneRow}>
                       <Ionicons
                         name="trophy-outline"
@@ -293,10 +296,10 @@ const styles = StyleSheet.create({
                       />
                       <View style={styles.milestoneText}>
                         <AppText variant="body" style={styles.milestoneLabel}>
-                          {nextMilestone.label}
+                          {itemNextMilestone.label}
                         </AppText>
                         <AppText variant="muted">
-                          {nextMilestone.timeRemainingText}
+                          {itemNextMilestone.timeRemainingText}
                         </AppText>
                       </View>
                     </View>
@@ -311,22 +314,6 @@ const styles = StyleSheet.create({
           }}
         />
       )}
-
-      <ConfirmModal
-        visible={!!eventToDelete}
-        title="Delete event?"
-        message={
-          eventToDelete
-            ? `Are you sure you want to delete "${eventToDelete.label}"? This will also remove its scheduled notifications.`
-            : ''
-        }
-        confirmText="Delete Event"
-        cancelText="Keep Event"
-        onConfirm={handleConfirmDelete}
-        onCancel={handleCancelDelete}
-        isDestructive
-        isLoading={isDeleting}
-      />
     </ScreenContainer>
   );
 }
