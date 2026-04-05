@@ -5,11 +5,25 @@ import {
 } from '@react-navigation/drawer';
 import { View, StyleSheet } from 'react-native';
 import DrawerContentHeader from './DrawerContentHeader';
-import { theme } from '../theme/theme';
+import { useTheme } from '../context/ThemeContext';
+
 
 export default function CustomDrawerContent(
   props: DrawerContentComponentProps
 ) {
+
+const { theme } = useTheme();
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.surface,
+  },
+  items: {
+    paddingTop: theme.spacing.sm,
+  },
+});
+
   return (
     <DrawerContentScrollView
       {...props}
@@ -22,13 +36,3 @@ export default function CustomDrawerContent(
     </DrawerContentScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.surface,
-  },
-  items: {
-    paddingTop: theme.spacing.sm,
-  },
-});

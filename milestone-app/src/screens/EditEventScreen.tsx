@@ -19,7 +19,7 @@ import ScreenContainer from '../components/ScreenContainer';
 import SectionCard from '../components/SectionCard';
 import AppButton from '../components/AppButton';
 import AppText from '../components/AppText';
-import { theme } from '../theme/theme';
+import { useTheme } from '../context/ThemeContext';
 
 type EditEventScreenProps = {
   navigation: any;
@@ -45,6 +45,9 @@ export default function EditEventScreen({
     defaultMilestoneIds
   );
   const [isSaving, setIsSaving] = useState(false);
+
+  const { theme } = useTheme();
+
 
   useEffect(() => {
     const loadEvent = async () => {
@@ -143,6 +146,51 @@ export default function EditEventScreen({
     );
   }
 
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    paddingBottom: theme.spacing.xl,
+  },
+  pageTitle: {
+    marginBottom: theme.spacing.xs,
+  },
+  pageSubtitle: {
+    marginBottom: theme.spacing.lg,
+  },
+  sectionTitle: {
+    marginBottom: theme.spacing.md,
+  },
+  sectionDescription: {
+    marginBottom: theme.spacing.sm,
+  },
+  label: {
+    marginBottom: theme.spacing.sm,
+  },
+  input: {
+    backgroundColor: theme.colors.surfaceSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    color: theme.colors.text,
+    fontSize: 16,
+  },
+  datePickerWrapper: {
+    marginTop: theme.spacing.md,
+    backgroundColor: theme.colors.surfaceSoft,
+    borderRadius: theme.radius.md,
+    overflow: 'hidden',
+    alignItems: 'center',
+  },
+  doneButtonWrapper: {
+    marginTop: theme.spacing.sm,
+  },
+  saveButtonWrapper: {
+    marginTop: theme.spacing.sm,
+  },
+});
+
   return (
     <ScreenContainer>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -232,47 +280,3 @@ export default function EditEventScreen({
     </ScreenContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  scrollContent: {
-    paddingBottom: theme.spacing.xl,
-  },
-  pageTitle: {
-    marginBottom: theme.spacing.xs,
-  },
-  pageSubtitle: {
-    marginBottom: theme.spacing.lg,
-  },
-  sectionTitle: {
-    marginBottom: theme.spacing.md,
-  },
-  sectionDescription: {
-    marginBottom: theme.spacing.sm,
-  },
-  label: {
-    marginBottom: theme.spacing.sm,
-  },
-  input: {
-    backgroundColor: theme.colors.surfaceSoft,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.md,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    color: theme.colors.text,
-    fontSize: 16,
-  },
-  datePickerWrapper: {
-    marginTop: theme.spacing.md,
-    backgroundColor: theme.colors.surfaceSoft,
-    borderRadius: theme.radius.md,
-    overflow: 'hidden',
-    alignItems: 'center',
-  },
-  doneButtonWrapper: {
-    marginTop: theme.spacing.sm,
-  },
-  saveButtonWrapper: {
-    marginTop: theme.spacing.sm,
-  },
-});

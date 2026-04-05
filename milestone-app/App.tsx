@@ -1,12 +1,13 @@
 import 'react-native-gesture-handler';
 import { useEffect, useRef } from 'react';
-import { AppState, AppStateStatus, Text } from 'react-native';
+import { AppState, AppStateStatus } from 'react-native';
 import {
   NavigationContainer,
   DefaultTheme,
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 
 import HomeScreen from './src/screens/HomeScreen';
 import AddEventScreen from './src/screens/AddEventScreen';
@@ -19,7 +20,6 @@ import {
   setupNotifications,
   syncAllEventNotifications,
 } from './src/utils/notifications';
-import { theme } from './src/theme/theme';
 import DrawerMenuButton from './src/components/DrawerMenuButton';
 import CustomDrawerContent from './src/components/CustomDrawerContent';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,22 +27,12 @@ import { Ionicons } from '@expo/vector-icons';
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
-const navTheme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    background: theme.colors.background,
-    card: theme.colors.surface,
-    text: theme.colors.text,
-    border: theme.colors.border,
-    primary: theme.colors.primary,
-  },
-};
-
 function HomeStackNavigator() {
+  const { theme } = useTheme();
+
   return (
     <Stack.Navigator
-      screenOptions={({ navigation }) => ({
+      screenOptions={{
         headerStyle: {
           backgroundColor: theme.colors.surface,
         },
@@ -54,7 +44,7 @@ function HomeStackNavigator() {
           backgroundColor: theme.colors.background,
         },
         headerShadowVisible: false,
-      })}
+      }}
     >
       <Stack.Screen
         name="HomeMain"
@@ -71,9 +61,22 @@ function HomeStackNavigator() {
   );
 }
 
-export default function App() {
+function AppContent() {
   const appState = useRef<AppStateStatus>(AppState.currentState);
   const isSyncingRef = useRef(false);
+  const { theme } = useTheme();
+
+  const navTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: theme.colors.background,
+      card: theme.colors.surface,
+      text: theme.colors.text,
+      border: theme.colors.border,
+      primary: theme.colors.primary,
+    },
+  };
 
   useEffect(() => {
     const runNotificationSync = async () => {
@@ -175,11 +178,23 @@ export default function App() {
           component={AboutScreen}
           options={{
             drawerIcon: ({ color, size }) => (
-              <Ionicons name="information-circle-outline" size={size} color={color} />
+              <Ionicons
+                name="information-circle-outline"
+                size={size}
+                color={color}
+              />
             ),
           }}
         />
       </Drawer.Navigator>
     </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }

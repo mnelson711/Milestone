@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { View, Pressable, StyleSheet } from 'react-native';
 import { milestoneRules } from '../utils/milestoneRules';
 import AppText from './AppText';
-import { theme } from '../theme/theme';
+import { useTheme } from '../context/ThemeContext';
 
 type MilestoneSelectorProps = {
   selectedMilestoneIds: string[];
@@ -13,6 +13,82 @@ export default function MilestoneSelector({
   selectedMilestoneIds,
   onToggleMilestone,
 }: MilestoneSelectorProps) {
+
+  const { theme } = useTheme();
+
+  const styles = StyleSheet.create({
+  container: {
+    marginTop: theme.spacing.sm,
+  },
+  categorySection: {
+    marginBottom: theme.spacing.md,
+  },
+  categoryHeader: {
+    backgroundColor: theme.colors.surfaceSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    padding: theme.spacing.md,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  categoryHeaderText: {
+    flex: 1,
+  },
+  chevron: {
+    color: theme.colors.text,
+    fontSize: 22,
+    fontWeight: '700',
+    marginLeft: theme.spacing.sm,
+  },
+  optionsContainer: {
+    marginTop: theme.spacing.sm,
+  },
+  optionCard: {
+    backgroundColor: theme.colors.surfaceSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
+  },
+  optionCardSelected: {
+    borderColor: theme.colors.primary,
+    backgroundColor: 'rgba(167, 139, 250, 0.14)',
+  },
+  optionHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: theme.radius.sm,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: theme.spacing.sm,
+    marginTop: 2,
+  },
+  checkboxSelected: {
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
+  },
+  checkmark: {
+    color: theme.colors.white,
+    fontWeight: '700',
+  },
+  optionText: {
+    flex: 1,
+  },
+  optionTitle: {
+    marginBottom: 2,
+  },
+});
+
   const categories = ['classic', 'anniversary', 'space'] as const;
 
   const [expandedCategories, setExpandedCategories] = useState<
@@ -122,76 +198,3 @@ function formatCategoryLabel(category: string): string {
       return category;
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginTop: theme.spacing.sm,
-  },
-  categorySection: {
-    marginBottom: theme.spacing.md,
-  },
-  categoryHeader: {
-    backgroundColor: theme.colors.surfaceSoft,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.md,
-    padding: theme.spacing.md,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  categoryHeaderText: {
-    flex: 1,
-  },
-  chevron: {
-    color: theme.colors.text,
-    fontSize: 22,
-    fontWeight: '700',
-    marginLeft: theme.spacing.sm,
-  },
-  optionsContainer: {
-    marginTop: theme.spacing.sm,
-  },
-  optionCard: {
-    backgroundColor: theme.colors.surfaceSoft,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.md,
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.sm,
-  },
-  optionCardSelected: {
-    borderColor: theme.colors.primary,
-    backgroundColor: 'rgba(167, 139, 250, 0.14)',
-  },
-  optionHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: theme.radius.sm,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: theme.spacing.sm,
-    marginTop: 2,
-  },
-  checkboxSelected: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
-  },
-  checkmark: {
-    color: theme.colors.white,
-    fontWeight: '700',
-  },
-  optionText: {
-    flex: 1,
-  },
-  optionTitle: {
-    marginBottom: 2,
-  },
-});

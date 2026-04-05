@@ -3,9 +3,27 @@ import ScreenContainer from '../components/ScreenContainer';
 import SectionCard from '../components/SectionCard';
 import AppText from '../components/AppText';
 import SectionHeader from '../components/SectionHeader';
-import { theme } from '../theme/theme';
+import { useTheme } from '../context/ThemeContext';
+
 
 export default function AboutScreen() {
+  const { theme } = useTheme();
+
+  const styles = StyleSheet.create({
+    pageTitle: {
+      marginBottom: theme.spacing.xs,
+    },
+    pageSubtitle: {
+      marginBottom: theme.spacing.lg,
+    },
+    bodyText: {
+      lineHeight: 22,
+    },
+    listItem: {
+      marginBottom: theme.spacing.sm,
+    },
+  });
+
   return (
     <ScreenContainer>
       <AppText variant="title" style={styles.pageTitle}>
@@ -63,18 +81,3 @@ export default function AboutScreen() {
     </ScreenContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  pageTitle: {
-    marginBottom: theme.spacing.xs,
-  },
-  pageSubtitle: {
-    marginBottom: theme.spacing.lg,
-  },
-  bodyText: {
-    lineHeight: 22,
-  },
-  listItem: {
-    marginBottom: theme.spacing.sm,
-  },
-});

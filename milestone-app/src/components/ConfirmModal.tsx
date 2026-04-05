@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import AppButton from './AppButton';
 import AppText from './AppText';
-import { theme } from '../theme/theme';
+import { useTheme } from '../context/ThemeContext';
 
 type ConfirmModalProps = {
   visible: boolean;
@@ -34,11 +34,53 @@ export default function ConfirmModal({
   isDestructive = false,
   isLoading = false,
 }: ConfirmModalProps) {
+
+    const { theme } = useTheme();
+
   const [isMounted, setIsMounted] = useState(visible);
 
   const overlayOpacity = useRef(new Animated.Value(0)).current;
   const modalScale = useRef(new Animated.Value(0.92)).current;
   const modalOpacity = useRef(new Animated.Value(0)).current;
+
+
+const styles = StyleSheet.create({
+  overlayContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: theme.spacing.lg,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(15, 23, 42, 0.72)',
+  },
+  backdropPressable: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 420,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.lg,
+    padding: theme.spacing.lg,
+  },
+  title: {
+    marginBottom: theme.spacing.sm,
+  },
+  message: {
+    marginBottom: theme.spacing.lg,
+    lineHeight: 20,
+  },
+  buttonColumn: {
+    marginTop: theme.spacing.sm,
+  },
+  cancelButtonWrapper: {
+    marginTop: theme.spacing.sm,
+  },
+});
 
   useEffect(() => {
     if (visible) {
@@ -152,41 +194,3 @@ export default function ConfirmModal({
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  overlayContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: theme.spacing.lg,
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(15, 23, 42, 0.72)',
-  },
-  backdropPressable: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  modalCard: {
-    width: '100%',
-    maxWidth: 420,
-    backgroundColor: theme.colors.surface,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.lg,
-    padding: theme.spacing.lg,
-  },
-  title: {
-    marginBottom: theme.spacing.sm,
-  },
-  message: {
-    marginBottom: theme.spacing.lg,
-    lineHeight: 20,
-  },
-  buttonColumn: {
-    marginTop: theme.spacing.sm,
-  },
-  cancelButtonWrapper: {
-    marginTop: theme.spacing.sm,
-  },
-});

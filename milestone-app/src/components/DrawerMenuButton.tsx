@@ -1,6 +1,7 @@
 import { Pressable, Text, StyleSheet } from 'react-native';
 import { DrawerActions } from '@react-navigation/native';
-import { theme } from '../theme/theme';
+import { useTheme } from '../context/ThemeContext';
+
 
 type DrawerMenuButtonProps = {
   navigation: any;
@@ -9,17 +10,10 @@ type DrawerMenuButtonProps = {
 export default function DrawerMenuButton({
   navigation,
 }: DrawerMenuButtonProps) {
-  return (
-    <Pressable
-      onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
-      style={styles.button}
-    >
-      <Text style={styles.icon}>☰</Text>
-    </Pressable>
-  );
-}
 
-const styles = StyleSheet.create({
+const { theme } = useTheme();
+
+    const styles = StyleSheet.create({
   button: {
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -30,3 +24,13 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
+  return (
+    <Pressable
+      onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
+      style={styles.button}
+    >
+      <Text style={styles.icon}>☰</Text>
+    </Pressable>
+  );
+}
+

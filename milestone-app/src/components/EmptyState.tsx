@@ -3,7 +3,8 @@ import { Ionicons } from '@expo/vector-icons';
 import AppText from './AppText';
 import AppButton from './AppButton';
 import SectionCard from './SectionCard';
-import { theme } from '../theme/theme';
+import { useTheme } from '../context/ThemeContext';
+
 
 type EmptyStateProps = {
   iconName?: keyof typeof Ionicons.glyphMap;
@@ -20,30 +21,9 @@ export default function EmptyState({
   buttonText,
   onPressButton,
 }: EmptyStateProps) {
-  return (
-    <SectionCard>
-      <View style={styles.container}>
-        <View style={styles.iconWrapper}>
-          <Ionicons name={iconName} size={28} color={theme.colors.primary} />
-        </View>
 
-        <AppText variant="subtitle" style={styles.title}>
-          {title}
-        </AppText>
+    const { theme } = useTheme();
 
-        <AppText variant="muted" style={styles.message}>
-          {message}
-        </AppText>
-
-        {buttonText && onPressButton ? (
-          <View style={styles.buttonWrapper}>
-            <AppButton title={buttonText} onPress={onPressButton} />
-          </View>
-        ) : null}
-      </View>
-    </SectionCard>
-  );
-}
 
 const styles = StyleSheet.create({
   container: {
@@ -73,3 +53,28 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 });
+
+  return (
+    <SectionCard>
+      <View style={styles.container}>
+        <View style={styles.iconWrapper}>
+          <Ionicons name={iconName} size={28} color={theme.colors.primary} />
+        </View>
+
+        <AppText variant="subtitle" style={styles.title}>
+          {title}
+        </AppText>
+
+        <AppText variant="muted" style={styles.message}>
+          {message}
+        </AppText>
+
+        {buttonText && onPressButton ? (
+          <View style={styles.buttonWrapper}>
+            <AppButton title={buttonText} onPress={onPressButton} />
+          </View>
+        ) : null}
+      </View>
+    </SectionCard>
+  );
+}

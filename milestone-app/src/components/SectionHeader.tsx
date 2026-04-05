@@ -1,7 +1,7 @@
 import { View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from './AppText';
-import { theme } from '../theme/theme';
+import { useTheme } from '../context/ThemeContext';
 
 type SectionHeaderProps = {
   title: string;
@@ -14,6 +14,31 @@ export default function SectionHeader({
   iconName,
   subtitle,
 }: SectionHeaderProps) {
+
+    const { theme } = useTheme();
+
+    const styles = StyleSheet.create({
+        container: {
+            marginBottom: theme.spacing.md,
+        },
+        titleRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        iconWrapper: {
+            width: 28,
+            height: 28,
+            borderRadius: 14,
+            backgroundColor: 'rgba(167, 139, 250, 0.12)',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: theme.spacing.sm,
+        },
+        subtitle: {
+            marginTop: theme.spacing.xs,
+        },
+    });
+
   return (
     <View style={styles.container}>
       <View style={styles.titleRow}>
@@ -31,25 +56,3 @@ export default function SectionHeader({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: theme.spacing.md,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconWrapper: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(167, 139, 250, 0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: theme.spacing.sm,
-  },
-  subtitle: {
-    marginTop: theme.spacing.xs,
-  },
-});

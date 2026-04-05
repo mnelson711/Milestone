@@ -24,7 +24,8 @@ import ScreenContainer from '../components/ScreenContainer';
 import SectionCard from '../components/SectionCard';
 import AppButton from '../components/AppButton';
 import AppText from '../components/AppText';
-import { theme } from '../theme/theme';
+import { useTheme } from '../context/ThemeContext';
+
 import SectionHeader from '../components/SectionHeader';
 
 if (
@@ -40,6 +41,10 @@ export default function SettingsScreen() {
   const [scheduledNotificationCount, setScheduledNotificationCount] = useState(0);
   const [isResyncing, setIsResyncing] = useState(false);
   const [showMilestoneDefaults, setShowMilestoneDefaults] = useState(false);
+
+  const { theme } = useTheme();
+  const { mode, toggleTheme } = useTheme();
+
 
   const loadSettingsData = async () => {
     const savedSettings = await getSettings();
@@ -160,6 +165,70 @@ export default function SettingsScreen() {
     );
   }
 
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    paddingBottom: theme.spacing.xl,
+  },
+  pageTitle: {
+    marginBottom: theme.spacing.xs,
+  },
+  pageSubtitle: {
+    marginBottom: theme.spacing.lg,
+  },
+  sectionTitle: {
+    marginBottom: theme.spacing.md,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: theme.spacing.md,
+  },
+  rowText: {
+    flex: 1,
+  },
+  selectorContainer: {
+    marginTop: theme.spacing.lg,
+  },
+  collapsibleHeader: {
+    backgroundColor: theme.colors.surfaceSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    padding: theme.spacing.md,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  collapsibleHeaderText: {
+    flex: 1,
+  },
+  collapsibleContent: {
+    marginTop: theme.spacing.sm,
+  },
+  selectorTitle: {
+    marginBottom: theme.spacing.xs,
+  },
+  selectorSubtitle: {
+    marginBottom: theme.spacing.sm,
+  },
+  chevron: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginLeft: theme.spacing.sm,
+  },
+  statusBlock: {
+    marginBottom: theme.spacing.md,
+  },
+  statusText: {
+    marginTop: theme.spacing.xs,
+  },
+  buttonGroup: {
+    marginTop: theme.spacing.sm,
+  },
+});
+
   return (
     <ScreenContainer>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -176,6 +245,7 @@ export default function SettingsScreen() {
             iconName="options-outline"
             subtitle="Choose default behavior for new events."
           />
+
 
           <View style={styles.row}>
             <View style={styles.rowText}>
@@ -281,70 +351,20 @@ export default function SettingsScreen() {
           </View>
         </SectionCard>
 
+        <SectionCard>
+          <SectionHeader
+            title="Appearance"
+            iconName="moon-outline"
+            subtitle="Customize how the app looks."
+          />
+
+          <AppButton
+            title={mode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            onPress={toggleTheme}
+          />
+        </SectionCard>
+
       </ScrollView>
     </ScreenContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  scrollContent: {
-    paddingBottom: theme.spacing.xl,
-  },
-  pageTitle: {
-    marginBottom: theme.spacing.xs,
-  },
-  pageSubtitle: {
-    marginBottom: theme.spacing.lg,
-  },
-  sectionTitle: {
-    marginBottom: theme.spacing.md,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: theme.spacing.md,
-  },
-  rowText: {
-    flex: 1,
-  },
-  selectorContainer: {
-    marginTop: theme.spacing.lg,
-  },
-  collapsibleHeader: {
-    backgroundColor: theme.colors.surfaceSoft,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.md,
-    padding: theme.spacing.md,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  collapsibleHeaderText: {
-    flex: 1,
-  },
-  collapsibleContent: {
-    marginTop: theme.spacing.sm,
-  },
-  selectorTitle: {
-    marginBottom: theme.spacing.xs,
-  },
-  selectorSubtitle: {
-    marginBottom: theme.spacing.sm,
-  },
-  chevron: {
-    fontSize: 22,
-    fontWeight: '700',
-    marginLeft: theme.spacing.sm,
-  },
-  statusBlock: {
-    marginBottom: theme.spacing.md,
-  },
-  statusText: {
-    marginTop: theme.spacing.xs,
-  },
-  buttonGroup: {
-    marginTop: theme.spacing.sm,
-  },
-});

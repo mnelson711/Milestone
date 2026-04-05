@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { Text, StyleSheet, TextStyle } from 'react-native';
-import { theme } from '../theme/theme';
+import { useTheme } from '../context/ThemeContext';
+
 
 type AppTextProps = {
   children: ReactNode;
@@ -13,6 +14,30 @@ export default function AppText({
   variant = 'body',
   style,
 }: AppTextProps) {
+
+  const { theme } = useTheme();
+
+
+  const styles = StyleSheet.create({
+    base: {
+      color: theme.colors.text,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: '700',
+    },
+    subtitle: {
+      fontSize: 20,
+      fontWeight: '600',
+    },
+    body: {
+      fontSize: 16,
+    },
+    muted: {
+      fontSize: 14,
+      color: theme.colors.textMuted,
+    },
+  });
   return (
     <Text
       style={[
@@ -29,23 +54,3 @@ export default function AppText({
   );
 }
 
-const styles = StyleSheet.create({
-  base: {
-    color: theme.colors.text,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-  },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  body: {
-    fontSize: 16,
-  },
-  muted: {
-    fontSize: 14,
-    color: theme.colors.textMuted,
-  },
-});

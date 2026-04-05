@@ -11,7 +11,8 @@ import SectionCard from '../components/SectionCard';
 import AppButton from '../components/AppButton';
 import AppText from '../components/AppText';
 import ConfirmModal from '../components/ConfirmModal';
-import { theme } from '../theme/theme';
+import { useTheme } from '../context/ThemeContext';
+
 import SectionHeader from '../components/SectionHeader';
 import EmptyState from '../components/EmptyState';
 
@@ -23,6 +24,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [eventToDelete, setEventToDelete] = useState<EventItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const { theme } = useTheme();
+
 
   const loadEvents = async () => {
     const storedEvents = await getEvents();
@@ -85,6 +88,113 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       setIsDeleting(false);
     }
   };
+
+
+const styles = StyleSheet.create({
+  pageTitle: {
+    marginBottom: theme.spacing.xs,
+  },
+  pageSubtitle: {
+    marginBottom: theme.spacing.lg,
+  },
+  sectionHeader: {
+    marginTop: theme.spacing.lg,
+    marginBottom: theme.spacing.sm,
+  },
+  listContent: {
+    paddingBottom: theme.spacing.xl,
+  },
+  cardBody: {
+    marginBottom: theme.spacing.md,
+  },
+  dateText: {
+    marginTop: theme.spacing.xs,
+  },
+  milestoneBlock: {
+    marginTop: theme.spacing.md,
+  },
+  blockLabel: {
+    marginBottom: theme.spacing.xs,
+  },
+  notificationsText: {
+    marginTop: theme.spacing.md,
+  },
+  footerRow: {
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
+    paddingTop: theme.spacing.sm,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  inlineLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: theme.spacing.md,
+  },
+  inlineLabelText: {
+    marginLeft: theme.spacing.xs,
+  },
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  title: {
+    flex: 1,
+  },
+
+  metaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  metaRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  metaText: {
+    marginLeft: 4,
+  },
+
+  milestoneRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: theme.spacing.xs,
+  },
+
+  milestoneText: {
+    marginLeft: theme.spacing.sm,
+    flex: 1,
+  },
+
+  milestoneLabel: {
+    marginBottom: 2,
+  },
+
+  noMilestone: {
+    marginTop: theme.spacing.xs,
+  },
+
+  deleteButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(248, 113, 113, 0.1)',
+    borderWidth: 1,
+    borderColor: theme.colors.danger,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  deleteButtonPressed: {
+    opacity: 0.7,
+    transform: [{ scale: 0.95 }],
+  },
+});
 
   return (
     <ScreenContainer>
@@ -220,109 +330,3 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     </ScreenContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  pageTitle: {
-    marginBottom: theme.spacing.xs,
-  },
-  pageSubtitle: {
-    marginBottom: theme.spacing.lg,
-  },
-  sectionHeader: {
-    marginTop: theme.spacing.lg,
-    marginBottom: theme.spacing.sm,
-  },
-  listContent: {
-    paddingBottom: theme.spacing.xl,
-  },
-  cardBody: {
-    marginBottom: theme.spacing.md,
-  },
-  dateText: {
-    marginTop: theme.spacing.xs,
-  },
-  milestoneBlock: {
-    marginTop: theme.spacing.md,
-  },
-  blockLabel: {
-    marginBottom: theme.spacing.xs,
-  },
-  notificationsText: {
-    marginTop: theme.spacing.md,
-  },
-  footerRow: {
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-    paddingTop: theme.spacing.sm,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  inlineLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: theme.spacing.md,
-  },
-  inlineLabelText: {
-    marginLeft: theme.spacing.xs,
-  },
-  topRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-
-  title: {
-    flex: 1,
-  },
-
-  metaRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-
-  metaRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  metaText: {
-    marginLeft: 4,
-  },
-
-  milestoneRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginTop: theme.spacing.xs,
-  },
-
-  milestoneText: {
-    marginLeft: theme.spacing.sm,
-    flex: 1,
-  },
-
-  milestoneLabel: {
-    marginBottom: 2,
-  },
-
-  noMilestone: {
-    marginTop: theme.spacing.xs,
-  },
-
-  deleteButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(248, 113, 113, 0.1)',
-    borderWidth: 1,
-    borderColor: theme.colors.danger,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  deleteButtonPressed: {
-    opacity: 0.7,
-    transform: [{ scale: 0.95 }],
-  },
-});

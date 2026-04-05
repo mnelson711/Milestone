@@ -12,7 +12,7 @@ import ScreenContainer from '../components/ScreenContainer';
 import SectionCard from '../components/SectionCard';
 import AppButton from '../components/AppButton';
 import AppText from '../components/AppText';
-import { theme } from '../theme/theme';
+import { useTheme } from '../context/ThemeContext';
 
 import SectionHeader from '../components/SectionHeader';
 import { Ionicons } from '@expo/vector-icons';
@@ -37,6 +37,9 @@ export default function EventDetailsScreen({
   const [isSavingNotificationPreference, setIsSavingNotificationPreference] =
     useState(false);
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
+
+  const { theme } = useTheme();
+
 
   const loadEvent = useCallback(async () => {
     setIsLoading(true);
@@ -100,6 +103,83 @@ export default function EventDetailsScreen({
 
   const milestones = getUpcomingMilestones(event, 4);
   const nextMilestone = getNextUpcomingMilestone(event);
+
+
+const styles = StyleSheet.create({
+  listContent: {
+    paddingBottom: theme.spacing.xl,
+  },
+  pageTitle: {
+    marginBottom: theme.spacing.xs,
+  },
+  pageSubtitle: {
+    marginBottom: theme.spacing.lg,
+  },
+  sectionTitle: {
+    marginBottom: theme.spacing.md,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
+  },
+  infoLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  infoLabelText: {
+    marginLeft: theme.spacing.xs,
+  },
+  editButtonWrapper: {
+    marginTop: theme.spacing.sm,
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+  },
+  toggleText: {
+    flex: 1,
+  },
+  statusBlock: {
+    marginBottom: theme.spacing.md,
+  },
+  statusMessage: {
+    marginTop: theme.spacing.xs,
+  },
+  nextMilestoneBlock: {
+    backgroundColor: theme.colors.surfaceSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    padding: theme.spacing.md,
+  },
+  blockLabel: {
+    marginBottom: theme.spacing.xs,
+  },
+  nextMilestoneTitle: {
+    marginBottom: theme.spacing.xs,
+  },
+  milestonesHeader: {
+    marginBottom: theme.spacing.sm,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  milestoneTitle: {
+    marginBottom: theme.spacing.xs,
+  },
+  milestoneDescription: {
+    marginBottom: theme.spacing.md,
+  },
+  milestoneMeta: {
+    gap: theme.spacing.xs,
+  },
+});
 
   return (
     <ScreenContainer>
@@ -263,79 +343,3 @@ export default function EventDetailsScreen({
     </ScreenContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  listContent: {
-    paddingBottom: theme.spacing.xl,
-  },
-  pageTitle: {
-    marginBottom: theme.spacing.xs,
-  },
-  pageSubtitle: {
-    marginBottom: theme.spacing.lg,
-  },
-  sectionTitle: {
-    marginBottom: theme.spacing.md,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: theme.spacing.md,
-    marginBottom: theme.spacing.sm,
-  },
-  infoLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  infoLabelText: {
-    marginLeft: theme.spacing.xs,
-  },
-  editButtonWrapper: {
-    marginTop: theme.spacing.sm,
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: theme.spacing.md,
-    marginBottom: theme.spacing.md,
-  },
-  toggleText: {
-    flex: 1,
-  },
-  statusBlock: {
-    marginBottom: theme.spacing.md,
-  },
-  statusMessage: {
-    marginTop: theme.spacing.xs,
-  },
-  nextMilestoneBlock: {
-    backgroundColor: theme.colors.surfaceSoft,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.md,
-    padding: theme.spacing.md,
-  },
-  blockLabel: {
-    marginBottom: theme.spacing.xs,
-  },
-  nextMilestoneTitle: {
-    marginBottom: theme.spacing.xs,
-  },
-  milestonesHeader: {
-    marginBottom: theme.spacing.sm,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  milestoneTitle: {
-    marginBottom: theme.spacing.xs,
-  },
-  milestoneDescription: {
-    marginBottom: theme.spacing.md,
-  },
-  milestoneMeta: {
-    gap: theme.spacing.xs,
-  },
-});
