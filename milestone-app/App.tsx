@@ -1,6 +1,7 @@
 import 'react-native-gesture-handler';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   NavigationContainer,
   DefaultTheme,
@@ -8,6 +9,7 @@ import {
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
+import OnboardingContext from './src/context/OnboardingContext';
 
 import HomeScreen from './src/screens/HomeScreen';
 import AddEventScreen from './src/screens/AddEventScreen';
@@ -15,6 +17,8 @@ import EventDetailsScreen from './src/screens/EventDetailsScreen';
 import EditEventScreen from './src/screens/EditEventScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import AboutScreen from './src/screens/AboutScreen';
+import OnboardingScreen from './src/screens/OnboardingScreen';
+import LaunchScreen from './src/screens/LaunchScreen';
 
 import {
   setupNotifications,
@@ -26,6 +30,10 @@ import { Ionicons } from '@expo/vector-icons';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
+
+const ONBOARDING_KEY = 'HAS_SEEN_ONBOARDING';
+
+type RootFlowState = 'loading' | 'onboarding' | 'app';
 
 function HomeStackNavigator() {
   const { theme } = useTheme();
@@ -62,9 +70,11 @@ function HomeStackNavigator() {
 }
 
 function AppContent() {
-  const appState = useRef<AppStateStatus>(AppState.currentState);
+  const lifecycleStateRef = useRef<AppStateStatus>(AppState.currentState);
   const isSyncingRef = useRef(false);
   const { theme } = useTheme();
+
+  const [rootFlowState, setRootFlowState] = useState<RootFlowState>('loading');
 
   const navTheme = {
     ...DefaultTheme,
@@ -79,6 +89,10 @@ function AppContent() {
   };
 
   useEffect(() => {
+    if (rootFlowState !== 'app') {
+      return;
+    }
+
     const runNotificationSync = async () => {
       if (isSyncingRef.current) {
         return;
@@ -107,13 +121,13 @@ function AppContent() {
     initializeNotifications();
 
     const subscription = AppState.addEventListener('change', (nextAppState) => {
-      const previousAppState = appState.current;
+      const previousAppState = lifecycleStateRef.current;
 
       const isReturningToForeground =
         (previousAppState === 'background' || previousAppState === 'inactive') &&
         nextAppState === 'active';
 
-      appState.current = nextAppState;
+      lifecycleStateRef.current = nextAppState;
 
       if (isReturningToForeground) {
         runNotificationSync();
@@ -123,71 +137,103 @@ function AppContent() {
     return () => {
       subscription.remove();
     };
-  }, []);
+  }, [rootFlowState]);
+
+  const handleLaunchComplete = (hasOnboarded: boolean) => {
+    setRootFlowState(hasOnboarded ? 'app' : 'onboarding');
+  };
+
+  const handleFinishOnboarding = async () => {
+    try {
+      await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
+    } catch (error) {
+      console.error('Error saving onboarding state:', error);
+    } finally {
+      setRootFlowState('app');
+    }
+  };
+
+  const restartOnboarding = async () => {
+    try {
+      await AsyncStorage.removeItem(ONBOARDING_KEY);
+    } catch (error) {
+      console.error('Error resetting onboarding state:', error);
+    } finally {
+      setRootFlowState('onboarding');
+    }
+  };
 
   return (
-    <NavigationContainer theme={navTheme}>
-      <Drawer.Navigator
-        drawerContent={(props) => <CustomDrawerContent {...props} />}
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: theme.colors.surface,
-          },
-          headerTintColor: theme.colors.text,
-          headerTitleStyle: {
-            fontWeight: '600',
-          },
-          headerShadowVisible: false,
-          drawerStyle: {
-            backgroundColor: theme.colors.surface,
-            width: 280,
-          },
-          drawerActiveTintColor: theme.colors.primary,
-          drawerInactiveTintColor: theme.colors.textMuted,
-          drawerActiveBackgroundColor: theme.colors.surfaceSoft,
-          drawerLabelStyle: {
-            fontSize: 16,
-            marginLeft: -8,
-          },
-          sceneStyle: {
-            backgroundColor: theme.colors.background,
-          },
-        }}
-      >
-        <Drawer.Screen
-          name="Home"
-          component={HomeStackNavigator}
-          options={{
-            headerShown: false,
-            drawerIcon: ({ color, size }) => (
-              <Ionicons name="home-outline" size={size} color={color} />
-            ),
-          }}
-        />
-        <Drawer.Screen
-          name="Settings"
-          component={SettingsScreen}
-          options={{
-            drawerIcon: ({ color, size }) => (
-              <Ionicons name="settings-outline" size={size} color={color} />
-            ),
-          }}
-        />
-        <Drawer.Screen
-          name="About"
-          component={AboutScreen}
-          options={{
-            drawerIcon: ({ color, size }) => (
-              <Ionicons
-                name="information-circle-outline"
-                size={size}
-                color={color}
-              />
-            ),
-          }}
-        />
-      </Drawer.Navigator>
-    </NavigationContainer>
+    <OnboardingContext.Provider value={{ restartOnboarding }}>
+      {rootFlowState === 'loading' ? (
+        <LaunchScreen onDone={handleLaunchComplete} />
+      ) : rootFlowState === 'onboarding' ? (
+        <OnboardingScreen onFinish={handleFinishOnboarding} />
+      ) : (
+        <NavigationContainer theme={navTheme}>
+          <Drawer.Navigator
+            drawerContent={(props) => <CustomDrawerContent {...props} />}
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: theme.colors.surface,
+              },
+              headerTintColor: theme.colors.text,
+              headerTitleStyle: {
+                fontWeight: '600',
+              },
+              headerShadowVisible: false,
+              drawerStyle: {
+                backgroundColor: theme.colors.surface,
+                width: 280,
+              },
+              drawerActiveTintColor: theme.colors.primary,
+              drawerInactiveTintColor: theme.colors.textMuted,
+              drawerActiveBackgroundColor: theme.colors.surfaceSoft,
+              drawerLabelStyle: {
+                fontSize: 16,
+                marginLeft: -8,
+              },
+              sceneStyle: {
+                backgroundColor: theme.colors.background,
+              },
+            }}
+          >
+            <Drawer.Screen
+              name="Home"
+              component={HomeStackNavigator}
+              options={{
+                headerShown: false,
+                drawerIcon: ({ color, size }) => (
+                  <Ionicons name="home-outline" size={size} color={color} />
+                ),
+              }}
+            />
+            <Drawer.Screen
+              name="Settings"
+              component={SettingsScreen}
+              options={{
+                drawerIcon: ({ color, size }) => (
+                  <Ionicons name="settings-outline" size={size} color={color} />
+                ),
+              }}
+            />
+            <Drawer.Screen
+              name="About"
+              component={AboutScreen}
+              options={{
+                drawerIcon: ({ color, size }) => (
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={size}
+                    color={color}
+                  />
+                ),
+              }}
+            />
+          </Drawer.Navigator>
+        </NavigationContainer>
+      )}
+    </OnboardingContext.Provider>
   );
 }
 

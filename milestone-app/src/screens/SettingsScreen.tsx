@@ -25,6 +25,7 @@ import SectionCard from '../components/SectionCard';
 import AppButton from '../components/AppButton';
 import AppText from '../components/AppText';
 import { useTheme } from '../context/ThemeContext';
+import { useOnboarding } from '../context/OnboardingContext';
 
 import SectionHeader from '../components/SectionHeader';
 
@@ -44,6 +45,27 @@ export default function SettingsScreen() {
 
   const { theme } = useTheme();
   const { mode, toggleTheme } = useTheme();
+
+  const { restartOnboarding } = useOnboarding();
+
+  const handleRestartOnboarding = () => {
+  Alert.alert(
+    'Restart onboarding?',
+    'This will take you back to the onboarding flow.',
+    [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Restart',
+        onPress: () => {
+          restartOnboarding();
+        },
+      },
+    ]
+  );
+};
 
 
   const loadSettingsData = async () => {
@@ -361,6 +383,20 @@ const styles = StyleSheet.create({
           <AppButton
             title={mode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             onPress={toggleTheme}
+          />
+        </SectionCard>
+
+        <SectionCard>
+          <SectionHeader
+            title="Developer"
+            iconName="construct-outline"
+            subtitle="Temporary testing tools."
+          />
+
+          <AppButton
+            title="Show Onboarding Again"
+            onPress={handleRestartOnboarding}
+            variant="secondary"
           />
         </SectionCard>
 

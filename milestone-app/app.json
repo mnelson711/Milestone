@@ -4,7 +4,12 @@
     "slug": "milestone-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "backgroundColor": "#0F172A",
+      "resizeMode": "contain"
+    },
     "scheme": "milestoneapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
