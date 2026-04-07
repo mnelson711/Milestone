@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   View,
   TextInput,
@@ -11,11 +11,12 @@ import DateTimePicker, {
   DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
-import { EventItem } from '../types';
+import { EventCategory, EventItem } from '../types';
 import { getEventById, updateEvent } from '../storage/storage';
 import { syncEventNotifications } from '../utils/notifications';
 import MilestoneSelector from '../components/MilestoneSelector';
 import { defaultMilestoneIds } from '../utils/milestoneRules';
+import { eventCategoryOptions } from '../utils/eventCategories';
 import ScreenContainer from '../components/ScreenContainer';
 import SectionCard from '../components/SectionCard';
 import AppButton from '../components/AppButton';
@@ -24,6 +25,7 @@ import SectionHeader from '../components/SectionHeader';
 import AppModal from '../components/AppModal';
 import AlertModal from '../components/AlertModal';
 import { useTheme } from '../context/ThemeContext';
+import { getSettings } from '../storage/settings';
 
 type EditEventScreenProps = {
   navigation: any;
@@ -50,8 +52,14 @@ export default function EditEventScreen({
   const [isLoading, setIsLoading] = useState(true);
   const [label, setLabel] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedCategory, setSelectedCategory] =
+    useState<EventCategory>('custom');
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [selectedMilestoneIds, setSelectedMilestoneIds] = useState<string[]>(
+    defaultMilestoneIds
+  );
+  const [enabledMilestoneIds, setEnabledMilestoneIds] = useState<string[]>(
     defaultMilestoneIds
   );
   const [isSaving, setIsSaving] = useState(false);
@@ -76,14 +84,26 @@ export default function EditEventScreen({
       setOriginalEvent(storedEvent);
       setLabel(storedEvent.label);
       setSelectedDate(new Date(storedEvent.date));
+      setSelectedCategory(storedEvent.category ?? 'custom');
       setSelectedMilestoneIds(
         storedEvent.selectedMilestoneIds ?? defaultMilestoneIds
       );
+
+      const settings = await getSettings();
+      setEnabledMilestoneIds(settings.enabledMilestoneIds);
+
       setIsLoading(false);
     };
 
     loadEvent();
   }, [eventId]);
+
+  const selectedCategoryOption = useMemo(() => {
+    return (
+      eventCategoryOptions.find((option) => option.id === selectedCategory) ??
+      eventCategoryOptions[0]
+    );
+  }, [selectedCategory]);
 
   const showAlert = (title: string, message: string) => {
     setAlertState({
@@ -121,6 +141,11 @@ export default function EditEventScreen({
     );
   };
 
+  const handleSelectCategory = (category: EventCategory) => {
+    setSelectedCategory(category);
+    setShowCategoryPicker(false);
+  };
+
   const handleSave = async () => {
     if (!originalEvent || isSaving) {
       return;
@@ -148,6 +173,7 @@ export default function EditEventScreen({
         ...originalEvent,
         label: trimmedLabel,
         date: selectedDate.toISOString(),
+        category: selectedCategory,
         selectedMilestoneIds,
       };
 
@@ -208,7 +234,7 @@ export default function EditEventScreen({
     detailsRowSpacing: {
       marginTop: theme.spacing.lg,
     },
-    dateField: {
+    fieldButton: {
       backgroundColor: theme.colors.surfaceSoft,
       borderWidth: 1,
       borderColor: theme.colors.border,
@@ -219,12 +245,12 @@ export default function EditEventScreen({
       alignItems: 'center',
       justifyContent: 'space-between',
     },
-    dateFieldLeft: {
+    fieldButtonLeft: {
       flexDirection: 'row',
       alignItems: 'center',
       flex: 1,
     },
-    dateFieldText: {
+    fieldButtonText: {
       marginLeft: theme.spacing.sm,
     },
     bottomBar: {
@@ -242,6 +268,32 @@ export default function EditEventScreen({
     },
     modalActions: {
       marginTop: theme.spacing.md,
+    },
+    categoryOption: {
+      backgroundColor: theme.colors.surfaceSoft,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: theme.radius.md,
+      padding: theme.spacing.md,
+      marginBottom: theme.spacing.sm,
+    },
+    categoryOptionSelected: {
+      borderColor: theme.colors.primary,
+      backgroundColor: 'rgba(167, 139, 250, 0.14)',
+    },
+    categoryOptionLast: {
+      marginBottom: 0,
+    },
+    categoryOptionRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+    },
+    categoryOptionText: {
+      flex: 1,
+      marginLeft: theme.spacing.sm,
+    },
+    categoryOptionTitle: {
+      marginBottom: 2,
     },
   });
 
@@ -288,16 +340,44 @@ export default function EditEventScreen({
 
               <Pressable
                 onPress={() => setShowDatePicker(true)}
-                style={styles.dateField}
+                style={styles.fieldButton}
               >
-                <View style={styles.dateFieldLeft}>
+                <View style={styles.fieldButtonLeft}>
                   <Ionicons
                     name="time-outline"
                     size={18}
                     color={theme.colors.primary}
                   />
-                  <AppText variant="body" style={styles.dateFieldText}>
+                  <AppText variant="body" style={styles.fieldButtonText}>
                     {selectedDate.toLocaleDateString()}
+                  </AppText>
+                </View>
+
+                <Ionicons
+                  name="chevron-forward-outline"
+                  size={18}
+                  color={theme.colors.textMuted}
+                />
+              </Pressable>
+            </View>
+
+            <View style={styles.detailsRowSpacing}>
+              <AppText variant="body" style={styles.label}>
+                Category
+              </AppText>
+
+              <Pressable
+                onPress={() => setShowCategoryPicker(true)}
+                style={styles.fieldButton}
+              >
+                <View style={styles.fieldButtonLeft}>
+                  <Ionicons
+                    name={selectedCategoryOption.iconName as any}
+                    size={18}
+                    color={theme.colors.primary}
+                  />
+                  <AppText variant="body" style={styles.fieldButtonText}>
+                    {selectedCategoryOption.label}
                   </AppText>
                 </View>
 
@@ -320,6 +400,7 @@ export default function EditEventScreen({
             <MilestoneSelector
               selectedMilestoneIds={selectedMilestoneIds}
               onToggleMilestone={handleToggleMilestone}
+              availableMilestoneIds={enabledMilestoneIds}
             />
           </SectionCard>
         </ScrollView>
@@ -361,6 +442,51 @@ export default function EditEventScreen({
             />
           </View>
         ) : null}
+      </AppModal>
+
+      <AppModal
+        visible={showCategoryPicker}
+        onRequestClose={() => setShowCategoryPicker(false)}
+      >
+        <AppText variant="subtitle" style={styles.modalTitle}>
+          Select Category
+        </AppText>
+
+        <AppText variant="muted" style={styles.modalSubtitle}>
+          Choose the type of event you want to track.
+        </AppText>
+
+        {eventCategoryOptions.map((option, index) => {
+          const isSelected = option.id === selectedCategory;
+          const isLast = index === eventCategoryOptions.length - 1;
+
+          return (
+            <Pressable
+              key={option.id}
+              onPress={() => handleSelectCategory(option.id)}
+              style={[
+                styles.categoryOption,
+                isSelected && styles.categoryOptionSelected,
+                isLast && styles.categoryOptionLast,
+              ]}
+            >
+              <View style={styles.categoryOptionRow}>
+                <Ionicons
+                  name={option.iconName as any}
+                  size={18}
+                  color={isSelected ? theme.colors.primary : theme.colors.text}
+                />
+
+                <View style={styles.categoryOptionText}>
+                  <AppText variant="body" style={styles.categoryOptionTitle}>
+                    {option.label}
+                  </AppText>
+                  <AppText variant="muted">{option.description}</AppText>
+                </View>
+              </View>
+            </Pressable>
+          );
+        })}
       </AppModal>
 
       <AlertModal

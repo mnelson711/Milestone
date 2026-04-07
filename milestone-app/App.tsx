@@ -19,6 +19,8 @@ import SettingsScreen from './src/screens/SettingsScreen';
 import AboutScreen from './src/screens/AboutScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import LaunchScreen from './src/screens/LaunchScreen';
+import MilestoneLibraryScreen from './src/screens/MilestoneLibraryScreen';
+import PastMilestonesScreen from './src/screens/PastMilestonesScreen';
 
 import {
   setupNotifications,
@@ -65,6 +67,20 @@ function HomeStackNavigator() {
       <Stack.Screen name="Add Event" component={AddEventScreen} />
       <Stack.Screen name="Event Details" component={EventDetailsScreen} />
       <Stack.Screen name="Edit Event" component={EditEventScreen} />
+      <Stack.Screen
+        name="Milestone Library"
+        component={MilestoneLibraryScreen}
+        options={{
+          title: 'Milestone Library',
+        }}
+      />
+      <Stack.Screen
+        name="Past Milestones"
+        component={PastMilestonesScreen}
+        options={{
+          title: 'Past Milestones',
+        }}
+      />
     </Stack.Navigator>
   );
 }

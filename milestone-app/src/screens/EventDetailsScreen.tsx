@@ -263,6 +263,22 @@ export default function EventDetailsScreen({
                   </AppText>
                 </View>
 
+                <View style={styles.infoRow}>
+                  <View style={styles.infoLabelRow}>
+                    <Ionicons
+                      name="sparkles-outline"
+                      size={16}
+                      color={theme.colors.textMuted}
+                    />
+                    <AppText variant="body" style={styles.infoLabelText}>
+                      Category
+                    </AppText>
+                  </View>
+                  <AppText variant="muted">
+                    {event.category}
+                  </AppText>
+                </View>
+
                 <View style={styles.editButtonWrapper}>
                   <AppButton
                     title="Edit Event"

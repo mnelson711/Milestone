@@ -183,6 +183,11 @@ upNextDateText: {
 
   const renderListHeader = () => (
     <View>
+      <AppButton
+        title="View Past Milestones"
+        onPress={() => navigation.navigate('Past Milestones')}
+        variant="secondary"
+      />
 
       {nextEvent && nextMilestone ? (
             <Pressable

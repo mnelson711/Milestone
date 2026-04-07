@@ -29,43 +29,6 @@ function getUnitMs(unit: MilestoneRule['unit']): number {
   }
 }
 
-function formatTimeRemaining(targetDate: Date): string {
-  const now = new Date();
-  const diffMs = targetDate.getTime() - now.getTime();
-
-  if (diffMs <= 0) {
-    return 'Today';
-  }
-
-  const diffDays = Math.ceil(diffMs / DAY_IN_MS);
-
-  if (diffDays === 1) {
-    return 'in 1 day';
-  }
-
-  if (diffDays < 30) {
-    return `in ${diffDays} days`;
-  }
-
-  const diffMonths = Math.ceil(diffDays / 30);
-
-  if (diffMonths === 1) {
-    return 'in 1 month';
-  }
-
-  if (diffMonths < 12) {
-    return `in ${diffMonths} months`;
-  }
-
-  const diffYears = Math.ceil(diffDays / 365);
-
-  if (diffYears === 1) {
-    return 'in 1 year';
-  }
-
-  return `in ${diffYears} years`;
-}
-
 function getSelectedRules(event: EventItem): MilestoneRule[] {
   const selectedIds =
     event.selectedMilestoneIds && event.selectedMilestoneIds.length > 0
@@ -102,28 +65,169 @@ function buildUpcomingMilestonesForRule(
   });
 }
 
-export function getUpcomingMilestones(
-  event: EventItem,
-  countPerRule: number = 2
-): UpcomingMilestone[] {
-  const baseDate = new Date(event.date);
 
-  if (Number.isNaN(baseDate.getTime())) {
-    return [];
+export type CalculatedMilestone = {
+  id: string;
+  label: string;
+  description: string;
+  targetDate: Date;
+  timeRemainingText: string;
+};
+
+export type PastMilestoneItem = {
+  eventId: string;
+  eventLabel: string;
+  milestoneId: string;
+  milestoneLabel: string;
+  milestoneDescription: string;
+  targetDate: Date;
+  timeSinceText: string;
+};
+
+function addTimeToDate(date: Date, rule: MilestoneRule): Date {
+  const nextDate = new Date(date);
+
+  switch (rule.unit) {
+    case 'minutes':
+      nextDate.setMinutes(nextDate.getMinutes() + rule.amount);
+      break;
+    case 'hours':
+      nextDate.setHours(nextDate.getHours() + rule.amount);
+      break;
+    case 'days':
+      nextDate.setDate(nextDate.getDate() + rule.amount);
+      break;
+    case 'weeks':
+      nextDate.setDate(nextDate.getDate() + rule.amount * 7);
+      break;
+    case 'months':
+      nextDate.setMonth(nextDate.getMonth() + rule.amount);
+      break;
+    case 'years':
+      nextDate.setFullYear(nextDate.getFullYear() + rule.amount);
+      break;
+    default:
+      break;
   }
 
-  const selectedRules = getSelectedRules(event);
-
-  const allMilestones = selectedRules.flatMap((rule) =>
-    buildUpcomingMilestonesForRule(baseDate, rule, countPerRule)
-  );
-
-  allMilestones.sort((a, b) => a.targetDate.getTime() - b.targetDate.getTime());
-
-  return allMilestones;
+  return nextDate;
 }
 
-export function getNextUpcomingMilestone(event: EventItem): UpcomingMilestone | null {
-  const milestones = getUpcomingMilestones(event, 1);
-  return milestones[0] ?? null;
+function formatTimeRemaining(targetDate: Date): string {
+  const now = new Date();
+  const diffMs = targetDate.getTime() - now.getTime();
+
+  if (diffMs <= 0) {
+    return 'Reached';
+  }
+
+  const minutes = Math.floor(diffMs / (1000 * 60));
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (days > 0) {
+    return days === 1 ? 'In 1 day' : `In ${days} days`;
+  }
+
+  if (hours > 0) {
+    return hours === 1 ? 'In 1 hour' : `In ${hours} hours`;
+  }
+
+  return minutes <= 1 ? 'In 1 minute' : `In ${minutes} minutes`;
+}
+
+function formatTimeSince(targetDate: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - targetDate.getTime();
+
+  const minutes = Math.floor(diffMs / (1000 * 60));
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (days > 0) {
+    return days === 1 ? '1 day ago' : `${days} days ago`;
+  }
+
+  if (hours > 0) {
+    return hours === 1 ? '1 hour ago' : `${hours} hours ago`;
+  }
+
+  return minutes <= 1 ? '1 minute ago' : `${minutes} minutes ago`;
+}
+
+export function getUpcomingMilestones(
+  event: EventItem,
+  limit?: number
+): CalculatedMilestone[] {
+  const eventDate = new Date(event.date);
+  const selectedRules = milestoneRules.filter((rule) =>
+    event.selectedMilestoneIds.includes(rule.id)
+  );
+
+  const upcoming = selectedRules
+    .map((rule) => {
+      const targetDate = addTimeToDate(eventDate, rule);
+
+      return {
+        id: rule.id,
+        label: rule.title,
+        description: rule.description,
+        targetDate,
+        timeRemainingText: formatTimeRemaining(targetDate),
+      };
+    })
+    .filter((milestone) => milestone.targetDate.getTime() > Date.now())
+    .sort((a, b) => a.targetDate.getTime() - b.targetDate.getTime());
+
+  return typeof limit === 'number' ? upcoming.slice(0, limit) : upcoming;
+}
+
+export function getNextUpcomingMilestone(
+  event: EventItem
+): CalculatedMilestone | null {
+  return getUpcomingMilestones(event, 1)[0] ?? null;
+}
+
+export function getPastMilestones(
+  event: EventItem,
+  limit?: number
+): PastMilestoneItem[] {
+  const eventDate = new Date(event.date);
+  const selectedRules = milestoneRules.filter((rule) =>
+    event.selectedMilestoneIds.includes(rule.id)
+  );
+
+  const pastMilestones = selectedRules
+    .map((rule) => {
+      const targetDate = addTimeToDate(eventDate, rule);
+
+      return {
+        eventId: event.id,
+        eventLabel: event.label,
+        milestoneId: rule.id,
+        milestoneLabel: rule.title,
+        milestoneDescription: rule.description,
+        targetDate,
+        timeSinceText: formatTimeSince(targetDate),
+      };
+    })
+    .filter((milestone) => milestone.targetDate.getTime() <= Date.now())
+    .sort((a, b) => b.targetDate.getTime() - a.targetDate.getTime());
+
+  return typeof limit === 'number'
+    ? pastMilestones.slice(0, limit)
+    : pastMilestones;
+}
+
+export function getAllPastMilestones(
+  events: EventItem[],
+  limit?: number
+): PastMilestoneItem[] {
+  const allPastMilestones = events
+    .flatMap((event) => getPastMilestones(event))
+    .sort((a, b) => b.targetDate.getTime() - a.targetDate.getTime());
+
+  return typeof limit === 'number'
+    ? allPastMilestones.slice(0, limit)
+    : allPastMilestones;
 }

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
   Switch,
@@ -25,9 +26,8 @@ import SectionCard from '../components/SectionCard';
 import AppButton from '../components/AppButton';
 import AppText from '../components/AppText';
 import { useTheme } from '../context/ThemeContext';
-import { useOnboarding } from '../context/OnboardingContext';
-
 import SectionHeader from '../components/SectionHeader';
+import { useOnboarding } from '../context/OnboardingContext';
 
 if (
   Platform.OS === 'android' &&
@@ -36,7 +36,11 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export default function SettingsScreen() {
+type SettingsScreenProps = {
+  navigation: any;
+};
+
+export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
   const [scheduledNotificationCount, setScheduledNotificationCount] = useState(0);
@@ -45,28 +49,7 @@ export default function SettingsScreen() {
 
   const { theme } = useTheme();
   const { mode, toggleTheme } = useTheme();
-
   const { restartOnboarding } = useOnboarding();
-
-  const handleRestartOnboarding = () => {
-  Alert.alert(
-    'Restart onboarding?',
-    'This will take you back to the onboarding flow.',
-    [
-      {
-        text: 'Cancel',
-        style: 'cancel',
-      },
-      {
-        text: 'Restart',
-        onPress: () => {
-          restartOnboarding();
-        },
-      },
-    ]
-  );
-};
-
 
   const loadSettingsData = async () => {
     const savedSettings = await getSettings();
@@ -79,9 +62,11 @@ export default function SettingsScreen() {
     setScheduledNotificationCount(scheduledNotifications.length);
   };
 
-  useEffect(() => {
-    loadSettingsData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadSettingsData();
+    }, [])
+  );
 
   const animateLayout = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -179,6 +164,25 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleRestartOnboarding = () => {
+    Alert.alert(
+      'Restart onboarding?',
+      'This will take you back to the onboarding flow.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Restart',
+          onPress: () => {
+            restartOnboarding();
+          },
+        },
+      ]
+    );
+  };
+
   if (!settings) {
     return (
       <ScreenContainer>
@@ -187,69 +191,71 @@ export default function SettingsScreen() {
     );
   }
 
-
-const styles = StyleSheet.create({
-  scrollContent: {
-    paddingBottom: theme.spacing.xl,
-  },
-  pageTitle: {
-    marginBottom: theme.spacing.xs,
-  },
-  pageSubtitle: {
-    marginBottom: theme.spacing.lg,
-  },
-  sectionTitle: {
-    marginBottom: theme.spacing.md,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: theme.spacing.md,
-  },
-  rowText: {
-    flex: 1,
-  },
-  selectorContainer: {
-    marginTop: theme.spacing.lg,
-  },
-  collapsibleHeader: {
-    backgroundColor: theme.colors.surfaceSoft,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.md,
-    padding: theme.spacing.md,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  collapsibleHeaderText: {
-    flex: 1,
-  },
-  collapsibleContent: {
-    marginTop: theme.spacing.sm,
-  },
-  selectorTitle: {
-    marginBottom: theme.spacing.xs,
-  },
-  selectorSubtitle: {
-    marginBottom: theme.spacing.sm,
-  },
-  chevron: {
-    fontSize: 22,
-    fontWeight: '700',
-    marginLeft: theme.spacing.sm,
-  },
-  statusBlock: {
-    marginBottom: theme.spacing.md,
-  },
-  statusText: {
-    marginTop: theme.spacing.xs,
-  },
-  buttonGroup: {
-    marginTop: theme.spacing.sm,
-  },
-});
+  const styles = StyleSheet.create({
+    scrollContent: {
+      paddingBottom: theme.spacing.xl,
+    },
+    pageTitle: {
+      marginBottom: theme.spacing.xs,
+    },
+    pageSubtitle: {
+      marginBottom: theme.spacing.lg,
+    },
+    sectionTitle: {
+      marginBottom: theme.spacing.md,
+    },
+    row: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: theme.spacing.md,
+    },
+    rowText: {
+      flex: 1,
+    },
+    selectorContainer: {
+      marginTop: theme.spacing.lg,
+    },
+    collapsibleHeader: {
+      backgroundColor: theme.colors.surfaceSoft,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: theme.radius.md,
+      padding: theme.spacing.md,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    collapsibleHeaderText: {
+      flex: 1,
+    },
+    collapsibleContent: {
+      marginTop: theme.spacing.sm,
+    },
+    selectorTitle: {
+      marginBottom: theme.spacing.xs,
+    },
+    selectorSubtitle: {
+      marginBottom: theme.spacing.sm,
+    },
+    chevron: {
+      fontSize: 22,
+      fontWeight: '700',
+      marginLeft: theme.spacing.sm,
+    },
+    statusBlock: {
+      marginBottom: theme.spacing.md,
+    },
+    statusText: {
+      marginTop: theme.spacing.xs,
+    },
+    buttonGroup: {
+      marginTop: theme.spacing.sm,
+    },
+    librarySummary: {
+      marginBottom: theme.spacing.md,
+    },
+  });
 
   return (
     <ScreenContainer>
@@ -267,7 +273,6 @@ const styles = StyleSheet.create({
             iconName="options-outline"
             subtitle="Choose default behavior for new events."
           />
-
 
           <View style={styles.row}>
             <View style={styles.rowText}>
@@ -320,10 +325,34 @@ const styles = StyleSheet.create({
                 <MilestoneSelector
                   selectedMilestoneIds={settings.defaultMilestoneIds}
                   onToggleMilestone={handleToggleMilestone}
+                  availableMilestoneIds={settings.enabledMilestoneIds}
                 />
               </View>
             ) : null}
           </View>
+        </SectionCard>
+
+        <SectionCard>
+          <SectionHeader
+            title="Milestone Library"
+            iconName="library-outline"
+            subtitle="Manage which milestone types are available throughout the app."
+          />
+
+          <AppText variant="muted" style={styles.librarySummary}>
+            {settings.enabledMilestoneIds.length} milestone
+            {settings.enabledMilestoneIds.length === 1 ? '' : 's'} enabled
+          </AppText>
+
+          <AppButton
+            title="Open Milestone Library"
+            onPress={() =>
+              navigation.navigate('Home', {
+                screen: 'Milestone Library',
+              })
+            }
+            variant="secondary"
+          />
         </SectionCard>
 
         <SectionCard>
@@ -399,7 +428,6 @@ const styles = StyleSheet.create({
             variant="secondary"
           />
         </SectionCard>
-
       </ScrollView>
     </ScreenContainer>
   );

@@ -1,90 +1,256 @@
-import { MilestoneRule } from '../types';
+import { MilestoneCategory, MilestoneRule } from '../types';
 
 export const milestoneRules: MilestoneRule[] = [
   {
-    id: 'days_100',
+    id: '7-days',
+    title: '7 Days',
+    description: 'Celebrate 7 days from the event date.',
+    category: 'classic',
+    unit: 'days',
+    amount: 7,
+    isRecommended: true,
+  },
+  {
+    id: '30-days',
+    title: '30 Days',
+    description: 'Celebrate 30 days from the event date.',
+    category: 'classic',
+    unit: 'days',
+    amount: 30,
+    isRecommended: true,
+  },
+  {
+    id: '100-days',
     title: '100 Days',
-    description: 'Celebrate every 100 days',
+    description: 'Celebrate 100 days from the event date.',
     category: 'classic',
     unit: 'days',
-    interval: 100,
+    amount: 100,
+    isRecommended: true,
   },
   {
-    id: 'days_1000',
+    id: '365-days',
+    title: '365 Days',
+    description: 'Celebrate 365 days from the event date.',
+    category: 'classic',
+    unit: 'days',
+    amount: 365,
+    isRecommended: true,
+  },
+  {
+    id: '500-days',
+    title: '500 Days',
+    description: 'Celebrate 500 days from the event date.',
+    category: 'classic',
+    unit: 'days',
+    amount: 500,
+    isRecommended: false,
+  },
+  {
+    id: '1000-days',
     title: '1,000 Days',
-    description: 'Celebrate every 1,000 days',
+    description: 'Celebrate 1,000 days from the event date.',
     category: 'classic',
     unit: 'days',
-    interval: 1000,
+    amount: 1000,
+    isRecommended: true,
   },
   {
-    id: 'days_10000',
+    id: '5000-days',
+    title: '5,000 Days',
+    description: 'Celebrate 5,000 days from the event date.',
+    category: 'classic',
+    unit: 'days',
+    amount: 5000,
+    isRecommended: false,
+  },
+  {
+    id: '10000-days',
     title: '10,000 Days',
-    description: 'Celebrate every 10,000 days',
+    description: 'Celebrate 10,000 days from the event date.',
     category: 'classic',
     unit: 'days',
-    interval: 10000,
+    amount: 10000,
+    isRecommended: false,
+  },
+
+  {
+    id: '1-month',
+    title: '1 Month',
+    description: 'Celebrate 1 month from the event date.',
+    category: 'anniversary',
+    unit: 'months',
+    amount: 1,
+    isRecommended: true,
   },
   {
-    id: 'hours_10000',
-    title: '10,000 Hours',
-    description: 'Celebrate every 10,000 hours',
-    category: 'classic',
-    unit: 'hours',
-    interval: 10000,
+    id: '3-months',
+    title: '3 Months',
+    description: 'Celebrate 3 months from the event date.',
+    category: 'anniversary',
+    unit: 'months',
+    amount: 3,
+    isRecommended: false,
   },
   {
-    id: 'minutes_100000',
-    title: '100,000 Minutes',
-    description: 'Celebrate every 100,000 minutes',
-    category: 'classic',
-    unit: 'minutes',
-    interval: 100000,
+    id: '6-months',
+    title: '6 Months',
+    description: 'Celebrate 6 months from the event date.',
+    category: 'anniversary',
+    unit: 'months',
+    amount: 6,
+    isRecommended: true,
   },
   {
-    id: 'minutes_1000000',
-    title: '1,000,000 Minutes',
-    description: 'Celebrate every 1,000,000 minutes',
-    category: 'classic',
-    unit: 'minutes',
-    interval: 1000000,
-  },
-  {
-    id: 'years_1',
+    id: '1-year',
     title: '1 Year',
-    description: 'Celebrate every year',
+    description: 'Celebrate the 1 year anniversary.',
     category: 'anniversary',
     unit: 'years',
-    interval: 1,
+    amount: 1,
+    isRecommended: true,
   },
   {
-    id: 'years_5',
+    id: '2-years',
+    title: '2 Years',
+    description: 'Celebrate the 2 year anniversary.',
+    category: 'anniversary',
+    unit: 'years',
+    amount: 2,
+    isRecommended: false,
+  },
+  {
+    id: '5-years',
     title: '5 Years',
-    description: 'Celebrate every 5 years',
+    description: 'Celebrate the 5 year anniversary.',
     category: 'anniversary',
     unit: 'years',
-    interval: 5,
+    amount: 5,
+    isRecommended: true,
   },
   {
-    id: 'moon_cycles_100',
-    title: '100 Moon Cycles',
-    description: 'About every 2,953 days',
+    id: '10-years',
+    title: '10 Years',
+    description: 'Celebrate the 10 year anniversary.',
+    category: 'anniversary',
+    unit: 'years',
+    amount: 10,
+    isRecommended: false,
+  },
+
+  {
+    id: '1000-minutes',
+    title: '1,000 Minutes',
+    description: 'Track a fun time-based milestone.',
+    category: 'time',
+    unit: 'minutes',
+    amount: 1000,
+    isRecommended: false,
+  },
+  {
+    id: '10000-minutes',
+    title: '10,000 Minutes',
+    description: 'Track a fun time-based milestone.',
+    category: 'time',
+    unit: 'minutes',
+    amount: 10000,
+    isRecommended: true,
+  },
+  {
+    id: '100000-minutes',
+    title: '100,000 Minutes',
+    description: 'Track a fun time-based milestone.',
+    category: 'time',
+    unit: 'minutes',
+    amount: 100000,
+    isRecommended: false,
+  },
+  {
+    id: '1000-hours',
+    title: '1,000 Hours',
+    description: 'Track a major time-based milestone.',
+    category: 'time',
+    unit: 'hours',
+    amount: 1000,
+    isRecommended: true,
+  },
+  {
+    id: '10000-hours',
+    title: '10,000 Hours',
+    description: 'Track a major time-based milestone.',
+    category: 'time',
+    unit: 'hours',
+    amount: 10000,
+    isRecommended: true,
+  },
+
+  {
+    id: '1-mercury-year',
+    title: '1 Mercury Year',
+    description: 'Celebrate one Mercury year from the event date.',
     category: 'space',
     unit: 'days',
-    interval: 2953,
+    amount: 88,
+    isRecommended: false,
   },
   {
-    id: 'venus_years_1',
+    id: '1-venus-year',
     title: '1 Venus Year',
-    description: 'About every 225 Earth days',
+    description: 'Celebrate one Venus year from the event date.',
     category: 'space',
     unit: 'days',
-    interval: 225,
+    amount: 225,
+    isRecommended: false,
+  },
+  {
+    id: '1-mars-year',
+    title: '1 Mars Year',
+    description: 'Celebrate one Mars year from the event date.',
+    category: 'space',
+    unit: 'days',
+    amount: 687,
+    isRecommended: false,
   },
 ];
 
-export const defaultMilestoneIds = [
-  'days_1000',
-  'hours_10000',
-  'minutes_100000',
+export const milestoneCategories: MilestoneCategory[] = [
+  'classic',
+  'anniversary',
+  'time',
+  'space',
 ];
+
+export function getRecommendedMilestoneIds(): string[] {
+  return milestoneRules
+    .filter((rule) => rule.isRecommended)
+    .map((rule) => rule.id);
+}
+
+export const defaultMilestoneIds = getRecommendedMilestoneIds();
+
+export function getMilestoneRuleById(id: string): MilestoneRule | null {
+  return milestoneRules.find((rule) => rule.id === id) ?? null;
+}
+
+export function getMilestonesByCategory(category: MilestoneCategory): MilestoneRule[] {
+  return milestoneRules.filter((rule) => rule.category === category);
+}
+
+export function getEnabledMilestoneRules(enabledMilestoneIds: string[]): MilestoneRule[] {
+  return milestoneRules.filter((rule) => enabledMilestoneIds.includes(rule.id));
+}
+
+export function formatCategoryLabel(category: string): string {
+  switch (category) {
+    case 'classic':
+      return 'Classic';
+    case 'anniversary':
+      return 'Anniversary';
+    case 'time':
+      return 'Time';
+    case 'space':
+      return 'Space';
+    default:
+      return category;
+  }
+}

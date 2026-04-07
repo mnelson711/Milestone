@@ -6,36 +6,58 @@ import {
   Animated,
   LayoutChangeEvent,
 } from 'react-native';
-import { milestoneRules } from '../utils/milestoneRules';
+import {
+  milestoneRules,
+  milestoneCategories,
+  formatCategoryLabel,
+} from '../utils/milestoneRules';
 import AppText from './AppText';
 import { useTheme } from '../context/ThemeContext';
 
 type MilestoneSelectorProps = {
   selectedMilestoneIds: string[];
   onToggleMilestone: (milestoneId: string) => void;
+  availableMilestoneIds?: string[];
 };
 
-const categories = ['classic', 'anniversary', 'space'] as const;
-type CategoryKey = (typeof categories)[number];
+type CategoryKey = (typeof milestoneCategories)[number];
 
 export default function MilestoneSelector({
   selectedMilestoneIds,
   onToggleMilestone,
+  availableMilestoneIds,
 }: MilestoneSelectorProps) {
   const { theme } = useTheme();
-
   const [expandedCategory, setExpandedCategory] = useState<CategoryKey | null>(null);
+
+  const visibleRules = useMemo(() => {
+    if (!availableMilestoneIds) {
+      return milestoneRules;
+    }
+
+    return milestoneRules.filter((rule) =>
+      availableMilestoneIds.includes(rule.id)
+    );
+  }, [availableMilestoneIds]);
+
+  const categories = useMemo(() => {
+    return milestoneCategories.filter((category) =>
+      visibleRules.some((rule) => rule.category === category)
+    );
+  }, [visibleRules]);
 
   const measuredHeights = useRef<Record<string, number>>({});
   const animatedHeights = useRef<Record<string, Animated.Value>>({
     classic: new Animated.Value(0),
     anniversary: new Animated.Value(0),
+    time: new Animated.Value(0),
     space: new Animated.Value(0),
   }).current;
 
   const animatedOpacities = useRef<Record<string, Animated.Value>>({
     classic: new Animated.Value(0),
     anniversary: new Animated.Value(0),
+    time: new Animated.Value(0),
     space: new Animated.Value(0),
   }).current;
 
@@ -116,16 +138,16 @@ export default function MilestoneSelector({
       alignItems: 'flex-start',
     },
     checkbox: {
-      width: 24,
-      height: 24,
+      width: 22,
+      height: 22,
       borderRadius: theme.radius.sm,
       borderWidth: 1,
       borderColor: theme.colors.border,
       backgroundColor: theme.colors.surface,
       alignItems: 'center',
       justifyContent: 'center',
-      marginRight: theme.spacing.sm,
-      marginTop: 2,
+      marginRight: 10,
+      marginTop: 1,
     },
     checkboxSelected: {
       backgroundColor: theme.colors.primary,
@@ -139,22 +161,24 @@ export default function MilestoneSelector({
       flex: 1,
     },
     optionTitle: {
-      marginBottom: 2,
+      marginBottom: 1,
     },
   });
 
   const rulesByCategory = useMemo(() => {
     return {
-      classic: milestoneRules.filter((rule) => rule.category === 'classic'),
-      anniversary: milestoneRules.filter((rule) => rule.category === 'anniversary'),
-      space: milestoneRules.filter((rule) => rule.category === 'space'),
+      classic: visibleRules.filter((rule) => rule.category === 'classic'),
+      anniversary: visibleRules.filter((rule) => rule.category === 'anniversary'),
+      time: visibleRules.filter((rule) => rule.category === 'time'),
+      space: visibleRules.filter((rule) => rule.category === 'space'),
     };
-  }, []);
+  }, [visibleRules]);
 
   const animateCategory = (category: CategoryKey, toOpen: boolean) => {
     const targetHeight = toOpen
-    ? (measuredHeights.current[category] ?? 0) + 22
-    : 0;
+      ? (measuredHeights.current[category] ?? 0) + 6
+      : 0;
+
     const targetOpacity = toOpen ? 1 : 0;
 
     Animated.parallel([
@@ -198,7 +222,7 @@ export default function MilestoneSelector({
       measuredHeights.current[category] = height;
 
       if (expandedCategory === category) {
-        animatedHeights[category].setValue(height);
+        animatedHeights[category].setValue(height + 6);
       }
     };
 
@@ -242,7 +266,9 @@ export default function MilestoneSelector({
                   <AppText variant="body" style={styles.optionTitle}>
                     {rule.title}
                   </AppText>
-                  <AppText variant="muted">{rule.description}</AppText>
+                  <AppText variant="muted" style={{ lineHeight: 18 }}>
+                    {rule.description}
+                  </AppText>
                 </View>
               </View>
             </Pressable>
@@ -312,17 +338,4 @@ export default function MilestoneSelector({
       })}
     </View>
   );
-}
-
-function formatCategoryLabel(category: string): string {
-  switch (category) {
-    case 'classic':
-      return 'Classic';
-    case 'anniversary':
-      return 'Anniversary';
-    case 'space':
-      return 'Space';
-    default:
-      return category;
-  }
 }
