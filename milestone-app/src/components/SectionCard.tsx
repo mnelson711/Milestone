@@ -2,7 +2,6 @@ import { ReactNode } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 
-
 type SectionCardProps = {
   children: ReactNode;
 };
@@ -22,4 +21,3 @@ export default function SectionCard({ children }: SectionCardProps) {
   });
   return <View style={styles.card}>{children}</View>;
 }
-

@@ -1,8 +1,4 @@
-export type MilestoneCategory =
-  | 'classic'
-  | 'anniversary'
-  | 'time'
-  | 'space';
+export type MilestoneCategory = 'classic' | 'anniversary' | 'time' | 'space';
 
 export type MilestoneUnit =
   | 'minutes'
@@ -28,12 +24,7 @@ export type AppSettings = {
   defaultMilestoneIds: string[];
 };
 
-type EventCategory =
-  | 'Birthday'
-  | 'Anniversary'
-  | 'Goal'
-  | 'Life'
-  | 'Other';
+type EventCategory = 'Birthday' | 'Anniversary' | 'Goal' | 'Life' | 'Other';
 
 export type EventItem = {
   id: string;

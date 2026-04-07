@@ -10,7 +10,9 @@ export function useOnboarding() {
   const context = useContext(OnboardingContext);
 
   if (!context) {
-    throw new Error('useOnboarding must be used inside OnboardingContext.Provider');
+    throw new Error(
+      'useOnboarding must be used inside OnboardingContext.Provider',
+    );
   }
 
   return context;

@@ -1,7 +1,6 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 
-
 type AppButtonProps = {
   title: string;
   onPress: () => void;
@@ -15,7 +14,6 @@ export default function AppButton({
   variant = 'primary',
   disabled = false,
 }: AppButtonProps) {
-
   const { theme } = useTheme();
 
   const styles = StyleSheet.create({
@@ -60,4 +58,3 @@ export default function AppButton({
     </Pressable>
   );
 }
-

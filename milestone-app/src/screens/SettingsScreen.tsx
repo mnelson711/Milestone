@@ -42,8 +42,11 @@ type SettingsScreenProps = {
 
 export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const [settings, setSettings] = useState<AppSettings | null>(null);
-  const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
-  const [scheduledNotificationCount, setScheduledNotificationCount] = useState(0);
+  const [permissionGranted, setPermissionGranted] = useState<boolean | null>(
+    null,
+  );
+  const [scheduledNotificationCount, setScheduledNotificationCount] =
+    useState(0);
   const [isResyncing, setIsResyncing] = useState(false);
   const [showMilestoneDefaults, setShowMilestoneDefaults] = useState(false);
 
@@ -65,7 +68,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   useFocusEffect(
     useCallback(() => {
       loadSettingsData();
-    }, [])
+    }, []),
   );
 
   const animateLayout = () => {
@@ -119,7 +122,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       granted ? 'Permissions Enabled' : 'Permissions Not Enabled',
       granted
         ? 'Notification permissions were granted.'
-        : 'Notification permissions are still disabled.'
+        : 'Notification permissions are still disabled.',
     );
   };
 
@@ -130,14 +133,17 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       setPermissionGranted(false);
       Alert.alert(
         'Notifications Off',
-        'Notification permission is not enabled for this app.'
+        'Notification permission is not enabled for this app.',
       );
       return;
     }
 
     await scheduleTestNotificationInFiveSeconds();
     setPermissionGranted(true);
-    Alert.alert('Scheduled', 'Test notification scheduled for 5 seconds from now.');
+    Alert.alert(
+      'Scheduled',
+      'Test notification scheduled for 5 seconds from now.',
+    );
   };
 
   const handleResyncNotifications = async () => {
@@ -154,11 +160,14 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
       Alert.alert(
         'Notifications Resynced',
-        `Scheduled notifications: ${scheduledNotifications.length}`
+        `Scheduled notifications: ${scheduledNotifications.length}`,
       );
     } catch (error) {
       console.error('Error resyncing notifications:', error);
-      Alert.alert('Error', 'Something went wrong while resyncing notifications.');
+      Alert.alert(
+        'Error',
+        'Something went wrong while resyncing notifications.',
+      );
     } finally {
       setIsResyncing(false);
     }
@@ -179,7 +188,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
             restartOnboarding();
           },
         },
-      ]
+      ],
     );
   };
 
@@ -368,8 +377,8 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               {permissionGranted === null
                 ? 'Checking...'
                 : permissionGranted
-                ? 'Granted'
-                : 'Not granted'}
+                  ? 'Granted'
+                  : 'Not granted'}
             </AppText>
 
             <AppText variant="muted" style={styles.statusText}>
@@ -394,7 +403,11 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
           <View style={styles.buttonGroup}>
             <AppButton
-              title={isResyncing ? 'Resyncing Notifications...' : 'Resync Notifications'}
+              title={
+                isResyncing
+                  ? 'Resyncing Notifications...'
+                  : 'Resync Notifications'
+              }
               onPress={handleResyncNotifications}
               variant="secondary"
               disabled={isResyncing}
@@ -410,7 +423,9 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           />
 
           <AppButton
-            title={mode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            title={
+              mode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'
+            }
             onPress={toggleTheme}
           />
         </SectionCard>

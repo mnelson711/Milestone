@@ -41,7 +41,7 @@ function getSelectedRules(event: EventItem): MilestoneRule[] {
 function buildUpcomingMilestonesForRule(
   baseDate: Date,
   rule: MilestoneRule,
-  count: number
+  count: number,
 ): UpcomingMilestone[] {
   const unitMs = getUnitMs(rule.unit);
   const now = new Date();
@@ -64,7 +64,6 @@ function buildUpcomingMilestonesForRule(
     };
   });
 }
-
 
 export type CalculatedMilestone = {
   id: string;
@@ -157,11 +156,11 @@ function formatTimeSince(targetDate: Date): string {
 
 export function getUpcomingMilestones(
   event: EventItem,
-  limit?: number
+  limit?: number,
 ): CalculatedMilestone[] {
   const eventDate = new Date(event.date);
   const selectedRules = milestoneRules.filter((rule) =>
-    event.selectedMilestoneIds.includes(rule.id)
+    event.selectedMilestoneIds.includes(rule.id),
   );
 
   const upcoming = selectedRules
@@ -183,18 +182,18 @@ export function getUpcomingMilestones(
 }
 
 export function getNextUpcomingMilestone(
-  event: EventItem
+  event: EventItem,
 ): CalculatedMilestone | null {
   return getUpcomingMilestones(event, 1)[0] ?? null;
 }
 
 export function getPastMilestones(
   event: EventItem,
-  limit?: number
+  limit?: number,
 ): PastMilestoneItem[] {
   const eventDate = new Date(event.date);
   const selectedRules = milestoneRules.filter((rule) =>
-    event.selectedMilestoneIds.includes(rule.id)
+    event.selectedMilestoneIds.includes(rule.id),
   );
 
   const pastMilestones = selectedRules
@@ -221,7 +220,7 @@ export function getPastMilestones(
 
 export function getAllPastMilestones(
   events: EventItem[],
-  limit?: number
+  limit?: number,
 ): PastMilestoneItem[] {
   const allPastMilestones = events
     .flatMap((event) => getPastMilestones(event))

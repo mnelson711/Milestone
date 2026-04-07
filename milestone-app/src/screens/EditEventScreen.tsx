@@ -56,12 +56,10 @@ export default function EditEventScreen({
     useState<EventCategory>('custom');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
-  const [selectedMilestoneIds, setSelectedMilestoneIds] = useState<string[]>(
-    defaultMilestoneIds
-  );
-  const [enabledMilestoneIds, setEnabledMilestoneIds] = useState<string[]>(
-    defaultMilestoneIds
-  );
+  const [selectedMilestoneIds, setSelectedMilestoneIds] =
+    useState<string[]>(defaultMilestoneIds);
+  const [enabledMilestoneIds, setEnabledMilestoneIds] =
+    useState<string[]>(defaultMilestoneIds);
   const [isSaving, setIsSaving] = useState(false);
   const [alertState, setAlertState] = useState<ModalAlertState>({
     visible: false,
@@ -86,7 +84,7 @@ export default function EditEventScreen({
       setSelectedDate(new Date(storedEvent.date));
       setSelectedCategory(storedEvent.category ?? 'custom');
       setSelectedMilestoneIds(
-        storedEvent.selectedMilestoneIds ?? defaultMilestoneIds
+        storedEvent.selectedMilestoneIds ?? defaultMilestoneIds,
       );
 
       const settings = await getSettings();
@@ -137,7 +135,7 @@ export default function EditEventScreen({
     setSelectedMilestoneIds((current) =>
       current.includes(milestoneId)
         ? current.filter((id) => id !== milestoneId)
-        : [...current, milestoneId]
+        : [...current, milestoneId],
     );
   };
 
@@ -161,7 +159,7 @@ export default function EditEventScreen({
     if (selectedMilestoneIds.length === 0) {
       showAlert(
         'Missing milestones',
-        'Please select at least one milestone type.'
+        'Please select at least one milestone type.',
       );
       return;
     }

@@ -392,7 +392,7 @@ export default function OnboardingScreen({ onFinish }: Props) {
             scrollEventThrottle={16}
             onScroll={Animated.event(
               [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-              { useNativeDriver: false }
+              { useNativeDriver: false },
             )}
             getItemLayout={(_, index) => ({
               length: pageWidth,

@@ -2,10 +2,7 @@ import 'react-native-gesture-handler';
 import { useEffect, useRef, useState } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  NavigationContainer,
-  DefaultTheme,
-} from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
@@ -140,7 +137,8 @@ function AppContent() {
       const previousAppState = lifecycleStateRef.current;
 
       const isReturningToForeground =
-        (previousAppState === 'background' || previousAppState === 'inactive') &&
+        (previousAppState === 'background' ||
+          previousAppState === 'inactive') &&
         nextAppState === 'active';
 
       lifecycleStateRef.current = nextAppState;

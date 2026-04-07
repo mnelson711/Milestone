@@ -29,7 +29,7 @@ export default function PastMilestonesScreen({
   useFocusEffect(
     useCallback(() => {
       loadEvents();
-    }, [])
+    }, []),
   );
 
   const pastMilestones = getAllPastMilestones(events, 25);
@@ -109,9 +109,7 @@ export default function PastMilestonesScreen({
               </AppText>
 
               <View style={styles.metaBlock}>
-                <AppText variant="muted">
-                  Reached {item.timeSinceText}
-                </AppText>
+                <AppText variant="muted">Reached {item.timeSinceText}</AppText>
                 <AppText variant="muted">
                   {item.targetDate.toLocaleDateString()}
                 </AppText>

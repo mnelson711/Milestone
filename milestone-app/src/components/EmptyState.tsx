@@ -5,7 +5,6 @@ import AppButton from './AppButton';
 import SectionCard from './SectionCard';
 import { useTheme } from '../context/ThemeContext';
 
-
 type EmptyStateProps = {
   iconName?: keyof typeof Ionicons.glyphMap;
   title: string;
@@ -21,38 +20,36 @@ export default function EmptyState({
   buttonText,
   onPressButton,
 }: EmptyStateProps) {
+  const { theme } = useTheme();
 
-    const { theme } = useTheme();
-
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    paddingVertical: theme.spacing.lg,
-  },
-  iconWrapper: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: 'rgba(167, 139, 250, 0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: theme.spacing.md,
-  },
-  title: {
-    marginBottom: theme.spacing.sm,
-    textAlign: 'center',
-  },
-  message: {
-    textAlign: 'center',
-    lineHeight: 20,
-    maxWidth: 280,
-  },
-  buttonWrapper: {
-    marginTop: theme.spacing.lg,
-    width: '100%',
-  },
-});
+  const styles = StyleSheet.create({
+    container: {
+      alignItems: 'center',
+      paddingVertical: theme.spacing.lg,
+    },
+    iconWrapper: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: 'rgba(167, 139, 250, 0.12)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: theme.spacing.md,
+    },
+    title: {
+      marginBottom: theme.spacing.sm,
+      textAlign: 'center',
+    },
+    message: {
+      textAlign: 'center',
+      lineHeight: 20,
+      maxWidth: 280,
+    },
+    buttonWrapper: {
+      marginTop: theme.spacing.lg,
+      width: '100%',
+    },
+  });
 
   return (
     <SectionCard>

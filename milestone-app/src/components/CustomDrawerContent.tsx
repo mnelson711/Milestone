@@ -7,22 +7,20 @@ import { View, StyleSheet } from 'react-native';
 import DrawerContentHeader from './DrawerContentHeader';
 import { useTheme } from '../context/ThemeContext';
 
-
 export default function CustomDrawerContent(
-  props: DrawerContentComponentProps
+  props: DrawerContentComponentProps,
 ) {
+  const { theme } = useTheme();
 
-const { theme } = useTheme();
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.surface,
-  },
-  items: {
-    paddingTop: theme.spacing.sm,
-  },
-});
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.surface,
+    },
+    items: {
+      paddingTop: theme.spacing.sm,
+    },
+  });
 
   return (
     <DrawerContentScrollView

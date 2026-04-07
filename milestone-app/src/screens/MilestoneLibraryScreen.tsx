@@ -41,7 +41,7 @@ export default function MilestoneLibraryScreen({ navigation }: Props) {
     setEnabledMilestoneIds((current) =>
       current.includes(milestoneId)
         ? current.filter((id) => id !== milestoneId)
-        : [...current, milestoneId]
+        : [...current, milestoneId],
     );
   };
 
@@ -49,39 +49,38 @@ export default function MilestoneLibraryScreen({ navigation }: Props) {
     setEnabledMilestoneIds(getRecommendedMilestoneIds());
   };
 
-const handleSave = async () => {
+  const handleSave = async () => {
     if (!settings || isSaving) {
-        return;
+      return;
     }
 
     if (enabledMilestoneIds.length === 0) {
-        setAlertVisible(true);
-        return;
+      setAlertVisible(true);
+      return;
     }
 
     setIsSaving(true);
 
     try {
-        const updatedSettings: AppSettings = {
+      const updatedSettings: AppSettings = {
         ...settings,
         enabledMilestoneIds,
         defaultMilestoneIds: settings.defaultMilestoneIds.filter((id) =>
-            enabledMilestoneIds.includes(id)
+          enabledMilestoneIds.includes(id),
         ),
-        };
+      };
 
-        await saveSettings(updatedSettings);
-        setSettings(updatedSettings);
+      await saveSettings(updatedSettings);
+      setSettings(updatedSettings);
 
-        // 👇 Navigate back to Settings screen (drawer)
-        navigation.navigate('Settings');
-
+      // 👇 Navigate back to Settings screen (drawer)
+      navigation.navigate('Settings');
     } catch (error) {
-        console.error('Error saving milestone library:', error);
+      console.error('Error saving milestone library:', error);
     } finally {
-        setIsSaving(false);
+      setIsSaving(false);
     }
-};
+  };
 
   if (!settings) {
     return (

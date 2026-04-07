@@ -41,7 +41,7 @@ export async function requestNotificationPermissions(): Promise<boolean> {
 }
 
 export async function cancelScheduledNotification(
-  notificationId?: string
+  notificationId?: string,
 ): Promise<void> {
   if (!notificationId) {
     return;
@@ -51,7 +51,7 @@ export async function cancelScheduledNotification(
 }
 
 export async function cancelScheduledNotifications(
-  notificationIds?: string[]
+  notificationIds?: string[],
 ): Promise<void> {
   if (!notificationIds || notificationIds.length === 0) {
     return;
@@ -59,8 +59,8 @@ export async function cancelScheduledNotifications(
 
   await Promise.all(
     notificationIds.map((notificationId) =>
-      Notifications.cancelScheduledNotificationAsync(notificationId)
-    )
+      Notifications.cancelScheduledNotificationAsync(notificationId),
+    ),
   );
 }
 
@@ -83,7 +83,7 @@ export async function scheduleTestNotificationInFiveSeconds(): Promise<void> {
 }
 
 export async function scheduleEventNotifications(
-  event: EventItem
+  event: EventItem,
 ): Promise<string[]> {
   if (event.notificationsEnabled === false) {
     return [];
@@ -114,7 +114,9 @@ export async function scheduleEventNotifications(
   return scheduledIds;
 }
 
-export async function syncEventNotifications(event: EventItem): Promise<EventItem> {
+export async function syncEventNotifications(
+  event: EventItem,
+): Promise<EventItem> {
   await cancelScheduledNotifications(event.scheduledNotificationIds);
 
   if (event.notificationsEnabled === false) {
@@ -166,7 +168,9 @@ export async function syncAllEventNotifications(): Promise<EventItem[]> {
     if (event.notificationsEnabled === false || !permissionsGranted) {
       syncedEvents.push({
         ...event,
-        notificationsEnabled: permissionsGranted ? event.notificationsEnabled : false,
+        notificationsEnabled: permissionsGranted
+          ? event.notificationsEnabled
+          : false,
         scheduledNotificationIds: [],
       });
 

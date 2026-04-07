@@ -23,13 +23,14 @@ export async function getSettings(): Promise<AppSettings> {
     const parsed = JSON.parse(raw);
 
     const enabledMilestoneIds =
-      Array.isArray(parsed.enabledMilestoneIds) && parsed.enabledMilestoneIds.length > 0
+      Array.isArray(parsed.enabledMilestoneIds) &&
+      parsed.enabledMilestoneIds.length > 0
         ? parsed.enabledMilestoneIds
         : recommendedMilestoneIds;
 
     const defaultMilestoneIds = Array.isArray(parsed.defaultMilestoneIds)
       ? parsed.defaultMilestoneIds.filter((id: string) =>
-          enabledMilestoneIds.includes(id)
+          enabledMilestoneIds.includes(id),
         )
       : enabledMilestoneIds;
 
@@ -40,7 +41,9 @@ export async function getSettings(): Promise<AppSettings> {
           : true,
       enabledMilestoneIds,
       defaultMilestoneIds:
-        defaultMilestoneIds.length > 0 ? defaultMilestoneIds : enabledMilestoneIds,
+        defaultMilestoneIds.length > 0
+          ? defaultMilestoneIds
+          : enabledMilestoneIds,
     };
   } catch (error) {
     console.error('Error loading settings:', error);
@@ -49,8 +52,8 @@ export async function getSettings(): Promise<AppSettings> {
 }
 
 export async function saveSettings(settings: AppSettings): Promise<void> {
-  const normalizedDefaultMilestoneIds = settings.defaultMilestoneIds.filter((id) =>
-    settings.enabledMilestoneIds.includes(id)
+  const normalizedDefaultMilestoneIds = settings.defaultMilestoneIds.filter(
+    (id) => settings.enabledMilestoneIds.includes(id),
   );
 
   const normalizedSettings: AppSettings = {

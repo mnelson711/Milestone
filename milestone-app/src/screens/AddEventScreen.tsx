@@ -46,9 +46,8 @@ export default function AddEventScreen({ navigation }: AddEventScreenProps) {
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [selectedMilestoneIds, setSelectedMilestoneIds] =
     useState<string[]>(defaultMilestoneIds);
-  const [enabledMilestoneIds, setEnabledMilestoneIds] = useState<string[]>(
-    defaultMilestoneIds
-  );
+  const [enabledMilestoneIds, setEnabledMilestoneIds] =
+    useState<string[]>(defaultMilestoneIds);
   const [defaultNotificationsEnabled, setDefaultNotificationsEnabled] =
     useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -110,7 +109,7 @@ export default function AddEventScreen({ navigation }: AddEventScreenProps) {
     setSelectedMilestoneIds((current) =>
       current.includes(milestoneId)
         ? current.filter((id) => id !== milestoneId)
-        : [...current, milestoneId]
+        : [...current, milestoneId],
     );
   };
 
@@ -130,7 +129,7 @@ export default function AddEventScreen({ navigation }: AddEventScreenProps) {
     if (selectedMilestoneIds.length === 0) {
       showAlert(
         'Missing milestones',
-        'Please select at least one milestone type.'
+        'Please select at least one milestone type.',
       );
       return;
     }

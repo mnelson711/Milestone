@@ -72,7 +72,7 @@ export async function updateEvent(updatedEvent: EventItem): Promise<void> {
   try {
     const existingEvents = await getEvents();
     const updatedEvents = existingEvents.map((event) =>
-      event.id === updatedEvent.id ? normalizeEvent(updatedEvent) : event
+      event.id === updatedEvent.id ? normalizeEvent(updatedEvent) : event,
     );
     await saveEvents(updatedEvents);
   } catch (error) {
@@ -83,7 +83,9 @@ export async function updateEvent(updatedEvent: EventItem): Promise<void> {
 export async function deleteEvent(eventId: string): Promise<void> {
   try {
     const existingEvents = await getEvents();
-    const updatedEvents = existingEvents.filter((event) => event.id !== eventId);
+    const updatedEvents = existingEvents.filter(
+      (event) => event.id !== eventId,
+    );
     await saveEvents(updatedEvents);
   } catch (error) {
     console.error('Error deleting event from storage:', error);

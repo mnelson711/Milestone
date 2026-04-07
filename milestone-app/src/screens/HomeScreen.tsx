@@ -49,7 +49,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   useFocusEffect(
     useCallback(() => {
       loadEvents();
-    }, [])
+    }, []),
   );
 
   const nextEvent = useMemo(() => {
@@ -125,60 +125,59 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     },
 
     upNextFeaturedCard: {
-  marginTop: theme.spacing.xs,
-  backgroundColor: 'rgba(167, 139, 250, 0.12)',
-  borderWidth: 1,
-  borderColor: theme.colors.primary,
-  borderRadius: theme.radius.md,
-  padding: theme.spacing.md,
-        marginBottom: theme.spacing.md,
+      marginTop: theme.spacing.xs,
+      backgroundColor: 'rgba(167, 139, 250, 0.12)',
+      borderWidth: 1,
+      borderColor: theme.colors.primary,
+      borderRadius: theme.radius.md,
+      padding: theme.spacing.md,
+      marginBottom: theme.spacing.md,
+    },
 
-},
+    upNextBadgeRow: {
+      flexDirection: 'row',
+      marginBottom: theme.spacing.md,
+    },
 
-upNextBadgeRow: {
-  flexDirection: 'row',
-  marginBottom: theme.spacing.md,
-},
+    upNextBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      paddingVertical: 6,
+      paddingHorizontal: 10,
+      borderRadius: 999,
+      backgroundColor: 'rgba(167, 139, 250, 0.16)',
+      borderWidth: 1,
+      borderColor: 'rgba(167, 139, 250, 0.35)',
+    },
 
-upNextBadge: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  alignSelf: 'flex-start',
-  paddingVertical: 6,
-  paddingHorizontal: 10,
-  borderRadius: 999,
-  backgroundColor: 'rgba(167, 139, 250, 0.16)',
-  borderWidth: 1,
-  borderColor: 'rgba(167, 139, 250, 0.35)',
-},
+    upNextBadgeText: {
+      marginLeft: theme.spacing.xs,
+      color: theme.colors.primary,
+    },
 
-upNextBadgeText: {
-  marginLeft: theme.spacing.xs,
-  color: theme.colors.primary,
-},
+    upNextEventTitle: {
+      marginBottom: theme.spacing.xs,
+    },
 
-upNextEventTitle: {
-  marginBottom: theme.spacing.xs,
-},
+    upNextMilestoneLabel: {
+      marginBottom: theme.spacing.md,
+    },
 
-upNextMilestoneLabel: {
-  marginBottom: theme.spacing.md,
-},
+    upNextTimeRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
 
-upNextTimeRow: {
-  flexDirection: 'row',
-  alignItems: 'center',
-},
+    upNextTimeText: {
+      marginLeft: theme.spacing.xs,
+      color: theme.colors.text,
+      fontWeight: '600',
+    },
 
-upNextTimeText: {
-  marginLeft: theme.spacing.xs,
-  color: theme.colors.text,
-  fontWeight: '600',
-},
-
-upNextDateText: {
-  marginTop: theme.spacing.xs,
-},
+    upNextDateText: {
+      marginTop: theme.spacing.xs,
+    },
   });
 
   const renderListHeader = () => (
@@ -190,48 +189,48 @@ upNextDateText: {
       />
 
       {nextEvent && nextMilestone ? (
-            <Pressable
-              style={styles.upNextFeaturedCard}
-              onPress={() =>
-                navigation.navigate('Event Details', { eventId: nextEvent.id })
-              }
-            >
-              <View style={styles.upNextBadgeRow}>
-                <View style={styles.upNextBadge}>
-                  <Ionicons
-                    name="sparkles-outline"
-                    size={14}
-                    color={theme.colors.primary}
-                  />
-                  <AppText variant="muted" style={styles.upNextBadgeText}>
-                    Up Next
-                  </AppText>
-                </View>
-              </View>
-
-              <AppText variant="subtitle" style={styles.upNextEventTitle}>
-                {nextEvent.label}
+        <Pressable
+          style={styles.upNextFeaturedCard}
+          onPress={() =>
+            navigation.navigate('Event Details', { eventId: nextEvent.id })
+          }
+        >
+          <View style={styles.upNextBadgeRow}>
+            <View style={styles.upNextBadge}>
+              <Ionicons
+                name="sparkles-outline"
+                size={14}
+                color={theme.colors.primary}
+              />
+              <AppText variant="muted" style={styles.upNextBadgeText}>
+                Up Next
               </AppText>
+            </View>
+          </View>
 
-              <AppText variant="body" style={styles.upNextMilestoneLabel}>
-                {nextMilestone.label}
-              </AppText>
+          <AppText variant="subtitle" style={styles.upNextEventTitle}>
+            {nextEvent.label}
+          </AppText>
 
-              <View style={styles.upNextTimeRow}>
-                <Ionicons
-                  name="time-outline"
-                  size={16}
-                  color={theme.colors.primary}
-                />
-                <AppText variant="body" style={styles.upNextTimeText}>
-                  {nextMilestone.timeRemainingText}
-                </AppText>
-              </View>
+          <AppText variant="body" style={styles.upNextMilestoneLabel}>
+            {nextMilestone.label}
+          </AppText>
 
-              <AppText variant="muted" style={styles.upNextDateText}>
-                {nextMilestone.targetDate.toLocaleDateString()}
-              </AppText>
-            </Pressable>
+          <View style={styles.upNextTimeRow}>
+            <Ionicons
+              name="time-outline"
+              size={16}
+              color={theme.colors.primary}
+            />
+            <AppText variant="body" style={styles.upNextTimeText}>
+              {nextMilestone.timeRemainingText}
+            </AppText>
+          </View>
+
+          <AppText variant="muted" style={styles.upNextDateText}>
+            {nextMilestone.targetDate.toLocaleDateString()}
+          </AppText>
+        </Pressable>
       ) : null}
 
       <View style={styles.sectionSpacing}>
@@ -242,15 +241,13 @@ upNextDateText: {
         />
       </View>
 
-            <View style={styles.sectionSpacing}>
+      <View style={styles.sectionSpacing}>
         <AppButton
           title={events.length === 0 ? 'Create Your First Event' : 'Add Event'}
           onPress={() => navigation.navigate('Add Event')}
         />
       </View>
     </View>
-
-    
   );
 
   return (

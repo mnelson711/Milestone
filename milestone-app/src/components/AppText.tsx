@@ -2,7 +2,6 @@ import { ReactNode } from 'react';
 import { Text, StyleSheet, TextStyle } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 
-
 type AppTextProps = {
   children: ReactNode;
   variant?: 'title' | 'subtitle' | 'body' | 'muted';
@@ -14,9 +13,7 @@ export default function AppText({
   variant = 'body',
   style,
 }: AppTextProps) {
-
   const { theme } = useTheme();
-
 
   const styles = StyleSheet.create({
     base: {
@@ -53,4 +50,3 @@ export default function AppText({
     </Text>
   );
 }
-

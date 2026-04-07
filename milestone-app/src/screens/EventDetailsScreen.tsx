@@ -1,7 +1,10 @@
 import { useCallback, useState } from 'react';
 import { View, FlatList, Switch, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { getUpcomingMilestones, getNextUpcomingMilestone } from '../utils/milestones';
+import {
+  getUpcomingMilestones,
+  getNextUpcomingMilestone,
+} from '../utils/milestones';
 import { EventItem } from '../types';
 import { getEventById, updateEvent, deleteEvent } from '../storage/storage';
 import {
@@ -37,7 +40,9 @@ export default function EventDetailsScreen({
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingNotificationPreference, setIsSavingNotificationPreference] =
     useState(false);
-  const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
+  const [permissionGranted, setPermissionGranted] = useState<boolean | null>(
+    null,
+  );
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -58,7 +63,7 @@ export default function EventDetailsScreen({
   useFocusEffect(
     useCallback(() => {
       loadEvent();
-    }, [loadEvent])
+    }, [loadEvent]),
   );
 
   const handleToggleNotifications = async (value: boolean) => {
@@ -274,9 +279,7 @@ export default function EventDetailsScreen({
                       Category
                     </AppText>
                   </View>
-                  <AppText variant="muted">
-                    {event.category}
-                  </AppText>
+                  <AppText variant="muted">{event.category}</AppText>
                 </View>
 
                 <View style={styles.editButtonWrapper}>
@@ -334,13 +337,15 @@ export default function EventDetailsScreen({
                     {permissionGranted === null
                       ? 'Checking...'
                       : permissionGranted
-                      ? 'Granted'
-                      : 'Not granted'}
+                        ? 'Granted'
+                        : 'Not granted'}
                   </AppText>
 
-                  {event.notificationsEnabled !== false && !permissionGranted ? (
+                  {event.notificationsEnabled !== false &&
+                  !permissionGranted ? (
                     <AppText variant="muted" style={styles.statusMessage}>
-                      Notifications are enabled for this event, but device permission is off.
+                      Notifications are enabled for this event, but device
+                      permission is off.
                     </AppText>
                   ) : null}
                 </View>
@@ -350,7 +355,10 @@ export default function EventDetailsScreen({
                     <AppText variant="body" style={styles.blockLabel}>
                       Next tracked milestone
                     </AppText>
-                    <AppText variant="subtitle" style={styles.nextMilestoneTitle}>
+                    <AppText
+                      variant="subtitle"
+                      style={styles.nextMilestoneTitle}
+                    >
                       {nextMilestone.label}
                     </AppText>
                     <AppText variant="muted">
@@ -389,21 +397,17 @@ export default function EventDetailsScreen({
                 <AppText variant="body">
                   {item.targetDate.toLocaleDateString()}
                 </AppText>
-                <AppText variant="muted">
-                  {item.timeRemainingText}
-                </AppText>
+                <AppText variant="muted">{item.timeRemainingText}</AppText>
               </View>
             </SectionCard>
           )}
           ListFooterComponent={
             <SectionCard>
-              <SectionHeader
-                title="Danger Zone"
-                iconName="warning-outline"
-              />
+              <SectionHeader title="Danger Zone" iconName="warning-outline" />
 
               <AppText variant="muted" style={styles.deleteSectionText}>
-                Deleting this event will also remove its scheduled notifications.
+                Deleting this event will also remove its scheduled
+                notifications.
               </AppText>
 
               <AppButton

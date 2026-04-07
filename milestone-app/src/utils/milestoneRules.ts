@@ -232,11 +232,15 @@ export function getMilestoneRuleById(id: string): MilestoneRule | null {
   return milestoneRules.find((rule) => rule.id === id) ?? null;
 }
 
-export function getMilestonesByCategory(category: MilestoneCategory): MilestoneRule[] {
+export function getMilestonesByCategory(
+  category: MilestoneCategory,
+): MilestoneRule[] {
   return milestoneRules.filter((rule) => rule.category === category);
 }
 
-export function getEnabledMilestoneRules(enabledMilestoneIds: string[]): MilestoneRule[] {
+export function getEnabledMilestoneRules(
+  enabledMilestoneIds: string[],
+): MilestoneRule[] {
   return milestoneRules.filter((rule) => enabledMilestoneIds.includes(rule.id));
 }
 

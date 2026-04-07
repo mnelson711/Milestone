@@ -28,7 +28,9 @@ export default function MilestoneSelector({
   availableMilestoneIds,
 }: MilestoneSelectorProps) {
   const { theme } = useTheme();
-  const [expandedCategory, setExpandedCategory] = useState<CategoryKey | null>(null);
+  const [expandedCategory, setExpandedCategory] = useState<CategoryKey | null>(
+    null,
+  );
 
   const visibleRules = useMemo(() => {
     if (!availableMilestoneIds) {
@@ -36,13 +38,13 @@ export default function MilestoneSelector({
     }
 
     return milestoneRules.filter((rule) =>
-      availableMilestoneIds.includes(rule.id)
+      availableMilestoneIds.includes(rule.id),
     );
   }, [availableMilestoneIds]);
 
   const categories = useMemo(() => {
     return milestoneCategories.filter((category) =>
-      visibleRules.some((rule) => rule.category === category)
+      visibleRules.some((rule) => rule.category === category),
     );
   }, [visibleRules]);
 
@@ -168,7 +170,9 @@ export default function MilestoneSelector({
   const rulesByCategory = useMemo(() => {
     return {
       classic: visibleRules.filter((rule) => rule.category === 'classic'),
-      anniversary: visibleRules.filter((rule) => rule.category === 'anniversary'),
+      anniversary: visibleRules.filter(
+        (rule) => rule.category === 'anniversary',
+      ),
       time: visibleRules.filter((rule) => rule.category === 'time'),
       space: visibleRules.filter((rule) => rule.category === 'space'),
     };
@@ -284,7 +288,7 @@ export default function MilestoneSelector({
         const rulesForCategory = rulesByCategory[category];
 
         const selectedCount = rulesForCategory.filter((rule) =>
-          selectedMilestoneIds.includes(rule.id)
+          selectedMilestoneIds.includes(rule.id),
         ).length;
 
         const isExpanded = expandedCategory === category;
@@ -309,10 +313,7 @@ export default function MilestoneSelector({
 
               <AppText
                 variant="body"
-                style={[
-                  styles.chevron,
-                  isExpanded && styles.chevronExpanded,
-                ]}
+                style={[styles.chevron, isExpanded && styles.chevronExpanded]}
               >
                 +
               </AppText>
